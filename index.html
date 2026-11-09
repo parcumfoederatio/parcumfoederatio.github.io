@@ -77,6 +77,9 @@
   .etape{position:relative;background:#fff;border:1px solid var(--ligne);border-radius:10px;padding:18px 20px 18px 70px}
   .etape::before{counter-increment:e;content:counter(e);position:absolute;left:18px;top:16px;width:36px;height:36px;border-radius:50%;background:var(--rouge);color:#fff;display:grid;place-items:center;font-weight:700;font-family:Arial,sans-serif}
   .encadre{margin-top:24px;background:#fff7dc;border:1px solid #f0d77a;border-radius:10px;padding:18px 20px}
+  .doc-btn{display:inline-block;margin-top:12px;background:var(--rouge);color:#fff;text-decoration:none;border-radius:6px;padding:9px 14px;font-size:.9rem;font-weight:600}
+  .doc-btn:hover{background:var(--rouge-f)}
+  .note{font-size:.88rem;color:var(--gris);margin-top:10px}
   footer{background:var(--encre);color:#d9d6cf;margin-top:40px}
   footer .in{max-width:1080px;margin:auto;padding:36px 18px;display:flex;gap:22px;align-items:center;flex-wrap:wrap}
   footer img{width:56px}
@@ -94,6 +97,7 @@
       <a href="#federation">La Fédération</a>
       <a href="#institutions">Institutions</a>
       <a href="#territoires">Territoires</a>
+      <a href="#economie">Économie</a>
       <a href="#constitution">Constitution</a>
       <a href="#decrets">Décrets</a>
       <a href="#citoyennete">Citoyenneté</a>
@@ -124,7 +128,7 @@
     <div class="carte r"><span class="tag sans">Capitale</span><h3>Saint-Paul-de-la-Croix</h3><p>Province fondatrice et siège de la capitale fédérale.</p></div>
     <div class="carte b"><span class="tag sans">Régime</span><h3>Fédération consulaire</h3><p>Cinq Consuls, un Sénat représentant les provinces et une Cour Suprême.</p></div>
     <div class="carte o"><span class="tag sans">Fondation</span><h3>26 mars 2025</h3><p>Date officielle de la naissance de la Fédération.</p></div>
-    <div class="carte"><span class="tag sans">Présence</span><h3>Québec &amp; Algérie</h3><p>La Fédération est établie au Québec, et un conseil annexe est en projet en Algérie.</p></div>
+    <div class="carte"><span class="tag sans">Présence</span><h3>Montréal &amp; Alger</h3><p>La Fédération est établie à Montréal et s'étend en Algérie avec la Marche d'Alger, créée par le Décret n°030.</p></div>
   </div>
 </section>
 
@@ -149,22 +153,36 @@
     <div class="carte"><span class="tag sans">Judiciaire</span><h3>La Cour Suprême</h3><p>Elle est présidée par le ministre de la Justice, qui en est le juge en chef.</p></div>
   </div>
 
-  <h3 style="margin-top:40px">Les Consuls fondateurs</h3>
+  <h3 style="margin-top:40px">Le Conseil du MMT</h3>
   <div class="consuls sans">
-    <div class="consul"><div class="ini">A</div><strong>Aylane G.</strong><div class="role">Consul fondateur</div></div>
-    <div class="consul"><div class="ini">J</div><strong>Joshua M.</strong><div class="role">Consul fondateur</div></div>
-    <div class="consul"><div class="ini">W</div><strong>William T.-C.</strong><div class="role">Consul fondateur</div></div>
-    <div class="consul"><div class="ini">M</div><strong>Maxime C.</strong><div class="role">Consul fondateur</div></div>
-    <div class="consul"><div class="ini">Y</div><strong>Youri L.-F.</strong><div class="role">Consul fondateur</div></div>
+    <div class="consul"><div class="ini">A</div><strong>Aylane Gamar</strong><div class="role">Consul titulaire · Ministre de la Justice et Juge de la Cour suprême · Parquistador d'Alger</div></div>
+    <div class="consul"><div class="ini">J</div><strong>Joshua Martin</strong><div class="role">Consul</div></div>
+    <div class="consul"><div class="ini">W</div><strong>William Tadimi-Choinière</strong><div class="role">Consul</div></div>
+    <div class="consul"><div class="ini">M</div><strong>Maxime Cimon</strong><div class="role">Consul · Ministre de l'Intelligence Parquiste, des Relations Intérieures et de la Défense Nationale</div></div>
+    <div class="consul"><div class="ini">Y</div><strong>Youri Lévesque-Florent</strong><div class="role">Consul</div></div>
   </div>
+  <p class="note sans">Depuis le 28 août 2026, Jérôme Dubreuil est Consul délégué d'Aylane Gamar, qui réside à l'étranger (Acte de délégation, Amendement I).</p>
+
+  <h3 style="margin-top:40px">Le Sénat</h3>
+  <p>Le Sénat compte un représentant par province, nommé par décret du Conseil du MMT. Sénateurs connus :</p>
+  <ul class="liste">
+    <li><strong>Jérôme Dubreuil</strong> : sénateur de la Province d'Ahuntsic</li>
+    <li><strong>Hugo Bernard Chardin</strong> : sénateur de la Province de Guzzo (Marché central), depuis le 4 septembre 2026</li>
+  </ul>
 
   <h3 style="margin-top:40px">Les ministères</h3>
+  <p>Le Décret n°030 établit dix ministères :</p>
   <ul class="liste">
     <li><strong>Ministère de l'Argent</strong></li>
-    <li><strong>Ministère de la Justice</strong> : son ministre est juge en chef de la Cour Suprême.</li>
-    <li><strong>Ministère de l'Aura et de la Santé</strong></li>
-    <li><strong>Ministère de l'Immigration et des Relations Extérieures</strong> : il délivre les cartes de citoyenneté.</li>
-    <li><strong>Ministère de la Culture</strong></li>
+    <li><strong>Ministère de la Justice</strong> : Aylane Gamar</li>
+    <li><strong>Ministère de l'Aura et de la Santé</strong> : poste vacant, assuré par le Conseil du MMT</li>
+    <li><strong>Ministère de l'Immigration et des Relations extérieures</strong></li>
+    <li><strong>Ministère de la Culture</strong> (aussi appelé Ministère des Arts et de la Culture)</li>
+    <li><strong>Ministère de l'Intelligence Parquiste</strong> : Maxime Cimon</li>
+    <li><strong>Ministère des Relations Intérieures</strong> : Maxime Cimon</li>
+    <li><strong>Ministère de la Défense Nationale</strong> : Maxime Cimon</li>
+    <li><strong>Ministère du Développement Scientifique et Technologique</strong> : Jérôme Dubreuil</li>
+    <li><strong>Ministère de l'Économie</strong></li>
   </ul>
 </section>
 
@@ -180,7 +198,21 @@
     <div class="carte b"><span class="tag sans">Province</span><h3>Guzzo</h3></div>
     <div class="carte b"><span class="tag sans">Province</span><h3>Desjardins</h3></div>
     <div class="carte o"><span class="tag sans">Territoire</span><h3>Place Fairfield</h3></div>
+    <div class="carte b"><span class="tag sans">Province</span><h3>Toilettes mixtes du CVM</h3><p>Créée par le Décret n°030. La Province des toilettes de S.-B. a été désannexée.</p></div>
     <div class="carte o"><span class="tag sans">Territoire</span><h3>Parc Gouin</h3></div>
+    <div class="carte"><span class="tag sans">Marche</span><h3>Marche d'Alger</h3><p>Division administrative dirigée par le Parquistador d'Alger, Aylane Gamar.</p></div>
+  </div>
+</section>
+
+<section id="economie">
+  <div class="kicker sans">Économie</div>
+  <h2>Le Sparc et l'économie parquiste</h2>
+  <p class="lead">Le Décret n°030 organise l'économie de la Fédération autour d'une monnaie officielle, le Sparc.</p>
+  <div class="grille">
+    <div class="carte o"><span class="tag sans">Monnaie</span><h3>Le Sparc (§)</h3><p>Monnaie virtuelle limitée à 121 Sparcs en circulation. Seuls les citoyens qui ne sont pas Consuls peuvent en détenir. On en gagne en travaillant pour une Société d'État, et on les dépense pour des biens du gouvernement : cartes, dictionnaires, drapeaux…</p></div>
+    <div class="carte r"><span class="tag sans">État</span><h3>Les Sociétés d'État</h3><p>Compagnies qui appartiennent au Conseil du MMT, coordonnées par une Société mère. Leurs employés sont payés en Sparcs ou en dollars canadiens, jusqu'à 40 $ par contrat.</p></div>
+    <div class="carte b"><span class="tag sans">Privé</span><h3>Les compagnies privées</h3><p>Tout citoyen peut fonder une compagnie. Une fois reconnue par l'État, elle obtient des avantages et paie une taxe de 7 % de son revenu.</p></div>
+    <div class="carte"><span class="tag sans">Relance</span><h3>Sparcomania &amp; Reset</h3><p>Après quatre mois d'inactivité, le Ministère de l'Économie organise une Sparcomania, une vente à prix réduit. Si ça ne suffit pas, il peut proposer un Reset économique par décret.</p></div>
   </div>
 </section>
 
@@ -199,6 +231,7 @@
     </ul>
   </div>
   <div class="article"><h3>Amendements</h3><p>Toute modification de la Constitution exige l'unanimité du Conseil du MMT.</p></div>
+  <div class="article"><h3>Amendement I — De la Délégation Consulaire</h3><p>Un Consul qui s'établit à l'étranger peut faire nommer un Consul délégué, qui le représente sur le territoire et exerce ses pouvoirs en son nom, sous son autorité.</p></div>
 </section>
 
 <section id="decrets">
@@ -210,6 +243,10 @@
   <details class="decret"><summary>Décret n°015 — Diffamation et atteinte à la réputation</summary><div class="corps"><p>La diffamation y est définie comme toute déclaration qui nuit à l'honneur, à la dignité ou à l'image d'une personne. Le décret s'applique à tous les citoyens comme aux membres du Conseil.</p><p>Les sanctions sont laissées à la discrétion du juge : une hausse de taxe pour un citoyen, ou la révocation temporaire de ses pouvoirs pour un Consul.</p></div></details>
   <details class="decret"><summary>Décret n°017 — Clarification territoriale</summary><div class="corps"><p>Ce décret crée la catégorie des Territoires et le statut de sénateur-observateur, sans droit de vote. Il précise aussi les frontières de Saint-Paul-de-la-Croix, d'Ahuntsic, de Sauvé et de la Place Fairfield.</p></div></details>
   <details class="decret"><summary>Décret — Annexion de Fleury, Guzzo et Desjardins</summary><div class="corps"><p>Ce décret crée les provinces de Fleury, de Guzzo et de Desjardins.</p></div></details>
+  <details class="decret"><summary>Décret S°4 — Nomination au Sénat</summary><div class="corps"><p>Hugo Bernard Chardin est nommé sénateur de la Province de Guzzo (Marché central), avec prise de fonction le 4 septembre 2026.</p><a class="doc-btn sans" href="decret-s004-nomination-senat.pdf" target="_blank">Lire le document officiel</a></div></details>
+  <details class="decret"><summary>Acte de délégation d'un Consul délégué</summary><div class="corps"><p>En vertu de l'Amendement I, Jérôme Dubreuil devient Consul délégué d'Aylane Gamar. L'acte est fait à Montréal le 27 août 2026 et prend effet le 28 août 2026 à 16 h.</p><a class="doc-btn sans" href="acte-delegation-consul-delegue.pdf" target="_blank">Lire le document officiel</a></div></details>
+  <details class="decret"><summary>Décret n°030 — Sur le rattrapage politique</summary><div class="corps"><p>Ce grand décret de 50 articles réorganise la Fédération. Il crée le Sparc et organise l'économie, établit dix ministères et nomme leurs titulaires, et crée les Ambassades Parquistes et la résidence permanente. Il institue aussi les Marches Parquistes et le Parquistador, établit la Marche d'Alger et réorganise les provinces.</p><a class="doc-btn sans" href="decret-030-rattrapage-politique.pdf" target="_blank">Lire le document officiel</a></div></details>
+  <p class="note sans">Les signatures sont masquées sur les documents publiés en ligne.</p>
 </section>
 
 <section id="citoyennete">
@@ -222,6 +259,10 @@
     <div class="etape"><h3>Obtenir la signature des Consuls</h3><p>La citoyenneté est accordée quand les cinq Consuls ont signé la demande. Chaque Consul garde un droit de veto.</p></div>
     <div class="etape"><h3>Recevoir sa carte</h3><p>Le Ministère de l'Immigration et des Relations Extérieures délivre ensuite la carte de citoyenneté, à sa discrétion.</p></div>
   </div>
+  <h3 style="margin-top:40px">La résidence permanente</h3>
+  <p>Le Décret n°030 crée un statut de résident permanent, distinct de la citoyenneté. Toute personne peut en faire la demande en donnant son nom complet, sa date de naissance, la date et le motif de la demande, et une déclaration de respect de la Constitution et des décrets. Elle est accordée par la majorité du Conseil du MMT, la majorité du Sénat, ou le Parquistador compétent. La résidence permanente ne donne pas la citoyenneté.</p>
+  <h3 style="margin-top:30px">Les Ambassades Parquistes</h3>
+  <p>Tout citoyen peut fonder une Ambassade Parquiste : un comité étudiant qui fait connaître la culture, les valeurs et les traditions parquistes dans une école ou un groupe. Elle peut demander sa reconnaissance au Sénat. Être membre d'une Ambassade ne donne pas la citoyenneté.</p>
   <div class="encadre">Pour commencer une demande, contactez un citoyen de la Fédération ou un membre du Conseil du MMT.</div>
 </section>
 
