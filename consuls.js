@@ -3,6 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/f
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, updateDoc, addDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let uid = null, moi = null, users = [];
+const prochainNo = () => Math.max(0, ...users.map(u => Number(u.citoyenNo) || 0)) + 1;
 const pseudoDe = id => users.find(u => u.id === id)?.pseudo || "?";
 
 onAuthStateChanged(auth, async user => {
@@ -46,7 +47,7 @@ async function signer(id) {
   try {
     const batch = writeBatch(db);
     if (d.signatures.length + 1 >= 5) {
-      const prochain = Math.max(0, ...users.map(u => u.citoyenNo || 0)) + 1;
+      const prochain = prochainNo();
       batch.update(doc(db, "demandes", id), { signatures: arrayUnion(uid), statut: "acceptee" });
       batch.update(doc(db, "users", id), { role: "citoyen", citoyenNo: prochain });
     } else batch.update(doc(db, "demandes", id), { signatures: arrayUnion(uid) });
@@ -64,18 +65,29 @@ function confirmer(t) { try { return window.confirm(t); } catch { return true; }
 function afficherRegistre() {
   const liste = [...users].sort((a, b) => (a.citoyenNo ?? 9999) - (b.citoyenNo ?? 9999) || a.pseudo.localeCompare(b.pseudo));
   $("#registre").innerHTML = liste.map(u => `<tr>
-    <td><b>${esc(u.pseudo)}</b><br><small>${numero(u.citoyenNo)}</small></td>
+    <td><b>${esc(u.pseudo)}</b><br>${moi.chef ? `<small>PF-</small><input class="no" type="number" min="1" step="1" value="${u.citoyenNo ?? ""}" data-no="${u.id}">` : `<small>${numero(u.citoyenNo)}</small>`}</td>
     <td><select data-role="${u.id}" ${u.id === uid || !moi.chef ? "disabled" : ""}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${v}</option>`).join("")}</select></td>
     <td><select data-couleur="${u.id}"><option value="">—</option>${Object.keys(COULEURS).map(c => `<option ${u.couleur === c ? "selected" : ""}>${c}</option>`).join("")}</select></td>
     <td>${u.role === "citoyen" ? u.sparcs + " §" : "—"}</td></tr>`).join("");
-  document.querySelectorAll("[data-role]").forEach(s => s.onchange = () => changer(s.dataset.role, { role: s.value }, s.value === "citoyen"));
+  document.querySelectorAll("[data-role]").forEach(s => s.onchange = () => {
+    const u = users.find(x => x.id === s.dataset.role);
+    if (!confirmer(`Changer le statut de ${u?.pseudo} en « ${ROLES[s.value]} » ?`)) { s.value = u?.role; return; }
+    changer(s.dataset.role, { role: s.value }, s.value === "citoyen");
+  });
+  document.querySelectorAll("[data-no]").forEach(i => i.onchange = () => {
+    const v = i.value === "" ? null : parseInt(i.value, 10);
+    if (v != null && !(v > 0)) return message($("#msg-registre"), "Le numéro doit être un entier plus grand que 0.", "erreur");
+    const pris = users.find(x => x.id !== i.dataset.no && Number(x.citoyenNo) === v);
+    if (v != null && pris) { i.value = users.find(x => x.id === i.dataset.no)?.citoyenNo ?? ""; return message($("#msg-registre"), `Le numéro ${numero(v)} appartient déjà à ${pris.pseudo}.`, "erreur"); }
+    changer(i.dataset.no, { citoyenNo: v });
+  });
   document.querySelectorAll("[data-couleur]").forEach(s => s.onchange = () => changer(s.dataset.couleur, { couleur: s.value || null }));
   $("#e-a").innerHTML = '<option value="">Choisir un citoyen…</option>' + liste.filter(u => u.role === "citoyen").map(u => `<option value="${u.id}">${esc(u.pseudo)} (${numero(u.citoyenNo)}) — ${u.sparcs} §</option>`).join("");
 }
 async function changer(id, champs, devientCitoyen) {
   if (champs.role && !moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut changer les statuts.", "erreur");
   const u = users.find(x => x.id === id);
-  if (devientCitoyen && u && u.citoyenNo == null) champs.citoyenNo = Math.max(0, ...users.map(x => x.citoyenNo || 0)) + 1;
+  if (devientCitoyen && u && u.citoyenNo == null) champs.citoyenNo = prochainNo();
   if (champs.role && champs.role !== "citoyen" && u?.sparcs) champs.sparcs = 0; // seuls les citoyens détiennent des Sparcs
   try { await updateDoc(doc(db, "users", id), champs); message($("#msg-registre"), "Modifié.", "ok"); }
   catch (e) { message($("#msg-registre"), erreurFr(e), "erreur"); }
