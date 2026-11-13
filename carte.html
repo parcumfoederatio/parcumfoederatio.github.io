@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carte — Parcum Fœderatio</title>
+<meta name="description" content="La carte interactive de la Fédération, de Montréal jusqu'à Alger.">
+<link rel="icon" type="image/png" href="embleme.png">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  #carte{height:min(68vh,620px);border-radius:12px;border:1px solid var(--ligne);box-shadow:0 6px 20px rgba(0,0,0,.06);z-index:1}
+  .boutons{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+  .boutons button{border:1px solid var(--ligne);background:#fff;border-radius:99px;padding:8px 16px;font-size:.92rem;cursor:pointer}
+  .boutons button.on{background:var(--rouge);color:#fff;border-color:var(--rouge)}
+  .legende{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--gris);margin-top:12px}
+  .legende span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px;background:var(--c)}
+  .liste-lieux{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:26px}
+  .lieu{background:#fff;border:1px solid var(--ligne);border-left:5px solid var(--c);border-radius:10px;padding:14px 16px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+  .lieu:hover{box-shadow:0 6px 16px rgba(0,0,0,.07)}
+  .lieu small{display:block;color:var(--gris);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase}
+  .pin{width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+  .pin.capitale{width:28px;height:28px}
+  .leaflet-popup-content{font-family:Georgia,serif;font-size:.95rem;line-height:1.5}
+  .leaflet-popup-content h4{font-size:1.05rem;margin-bottom:2px}
+  .leaflet-popup-content .t{font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:#C8090A;font-weight:700}
+  .leaflet-popup-content .d{font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:.78rem;color:#5c5c66;margin-top:6px}
+</style>
+</head>
+<body>
+<header class="barre sans">
+  <div class="in">
+    <a href="index.html"><img src="embleme.png" alt="Emblème"></a>
+    <a class="nom" href="index.html">PARCUM FŒDERATIO</a>
+    <button class="menu-btn" onclick="document.getElementById('nav').classList.toggle('ouvert')">Menu</button>
+    <nav id="nav">
+      <a href="index.html">Accueil</a>
+      <a href="mmt.html">Le MMT</a>
+      <a href="institutions.html">Institutions</a>
+      <a href="territoires.html">Territoires</a>
+      <a href="carte.html" class="actif">Carte</a>
+      <a href="economie.html">Économie</a>
+      <a href="constitution.html">Constitution</a>
+      <a href="decrets.html">Décrets</a>
+      <a href="citoyennete.html">Citoyenneté</a>
+    </nav>
+  </div>
+</header>
+<div class="tete">
+  <div class="in">
+    <div class="kicker sans">Carte</div>
+    <h1>La Fédération sur la carte</h1>
+    <div class="fil sans"><a href="index.html">Accueil</a> › Carte</div>
+  </div>
+</div>
+<main>
+<section>
+  <div class="boutons sans">
+    <button id="b-mtl" class="on">Montréal</button>
+    <button id="b-alg">Alger</button>
+    <button id="b-all">Toute la Fédération</button>
+  </div>
+  <div id="carte"></div>
+  <div class="legende sans">
+    <span style="--c:#7a0506">Capitale</span>
+    <span style="--c:#C8090A">Province</span>
+    <span style="--c:#F2B705">Territoire</span>
+    <span style="--c:#1E6B3A">Marche</span>
+  </div>
+  <div class="liste-lieux sans" id="liste"></div>
+  <p class="note sans">Les positions sont approximatives. Les frontières officielles sont définies dans le Décret n°017.</p>
+  <div class="suite sans"><a href="territoires.html">← Territoires</a><a href="economie.html">Économie →</a></div>
+</section>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const LIEUX=[{"nom": "Saint-Paul-de-la-Croix", "type": "Capitale", "lat": 45.5545, "lng": -73.6505, "desc": "1re province et capitale de la Fédération. Le parc Saint-Paul-de-la-Croix, entre Christophe-Colomb, Hamel, Sauriol et Sauvé.", "dec": "Constitution · Décret n°017"}, {"nom": "Ahuntsic", "type": "Province", "lat": 45.5548, "lng": -73.6592, "desc": "2e province. Le parc Ahuntsic, entre Lajeunesse, Saint-Hubert, Henri-Bourassa et Fleury.", "dec": "Constitution · Décret n°017"}, {"nom": "Sauvé", "type": "Province", "lat": 45.5506, "lng": -73.6561, "desc": "3e province. L'intérieur de la station de métro Sauvé, des entrées jusqu'au bout des quais.", "dec": "Constitution · Décret n°017"}, {"nom": "Fleury", "type": "Province", "lat": 45.561, "lng": -73.65, "desc": "4e province. La Promenade Fleury, de Saint-Hubert jusqu'à Papineau.", "dec": "Décret n°017"}, {"nom": "Guzzo", "type": "Province", "lat": 45.5343, "lng": -73.655, "desc": "5e province. Le Marché central, nommé en hommage à son attraction historique.", "dec": "Décret n°017"}, {"nom": "Desjardins", "type": "Province", "lat": 45.5078, "lng": -73.5647, "desc": "6e province. Le Complexe Desjardins.", "dec": "Décret n°017"}, {"nom": "Gouin", "type": "Province", "lat": 45.5622, "lng": -73.6677, "desc": "Les espaces verts extérieurs autour de Sophie-Barat, le long de la rivière des Prairies.", "dec": "Décrets n°005 et n°017"}, {"nom": "Toilettes mixtes du CVM", "type": "Province", "lat": 45.5142, "lng": -73.5627, "desc": "La toilette mixte du 3e étage du Cégep du Vieux Montréal.", "dec": "Décret n°030"}, {"nom": "Place Fairfield", "type": "Territoire", "lat": 45.4785, "lng": -73.5835, "desc": "Le parc Victor-Rousselot. Ce qui se passe à Fairfield reste à Fairfield.", "dec": "Décrets n°003 et n°017"}, {"nom": "Marche d'Alger", "type": "Marche", "lat": 36.7538, "lng": 3.0588, "desc": "Division administrative de la Fédération, dirigée par le Parquistador d'Alger, Aylane Gamar.", "dec": "Décret n°030"}];
+const COUL={"Capitale":"#7a0506","Province":"#C8090A","Territoire":"#F2B705","Marche":"#1E6B3A"};
+const carte=L.map('carte',{scrollWheelZoom:false});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(carte);
+const marq=[];
+LIEUX.forEach((l,i)=>{
+  const ic=L.divIcon({className:'',html:`<div class="pin ${l.type==='Capitale'?'capitale':''}" style="background:${COUL[l.type]}"></div>`,iconSize:[28,28],iconAnchor:[14,28],popupAnchor:[0,-26]});
+  const m=L.marker([l.lat,l.lng],{icon:ic,title:l.nom}).addTo(carte).bindPopup(`<div class="t">${l.type}</div><h4>${l.nom}</h4>${l.desc}<div class="d">${l.dec}</div>`);
+  marq.push(m);
+  const b=document.createElement('button'); b.className='lieu'; b.style.setProperty('--c',COUL[l.type]);
+  b.innerHTML=`<small>${l.type}</small><strong>${l.nom}</strong>`;
+  b.onclick=()=>{carte.flyTo([l.lat,l.lng],l.type==='Marche'?11:15); m.openPopup(); document.getElementById('carte').scrollIntoView({behavior:'smooth',block:'center'});};
+  document.getElementById('liste').appendChild(b);
+});
+const mtl=L.latLngBounds(LIEUX.filter(l=>l.type!=='Marche').map(l=>[l.lat,l.lng]));
+const actif=id=>document.querySelectorAll('.boutons button').forEach(x=>x.classList.toggle('on',x.id===id));
+document.getElementById('b-mtl').onclick=()=>{carte.flyToBounds(mtl,{padding:[40,40]});actif('b-mtl')};
+document.getElementById('b-alg').onclick=()=>{carte.flyTo([36.7538,3.0588],11);actif('b-alg')};
+document.getElementById('b-all').onclick=()=>{carte.flyToBounds(L.latLngBounds(LIEUX.map(l=>[l.lat,l.lng])),{padding:[40,40]});actif('b-all')};
+carte.fitBounds(mtl,{padding:[40,40]});
+carte.on('focus',()=>carte.scrollWheelZoom.enable());
+</script>
+<footer class="sans">
+  <div class="in">
+    <img src="embleme.png" alt="">
+    <div>
+      <strong>Parcum Fœderatio</strong> · Fédération du Parc<br>
+      <span class="petit">« Que le Parc nous accepte et nous guide » · Fondée le 26 mars 2025</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
