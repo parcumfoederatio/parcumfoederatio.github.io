@@ -45,7 +45,7 @@ export function erreurFr(e) {
 // Carte de citoyen numérique
 export function carteHTML(u) {
   const coul = COULEURS[u.couleur] || "#c9c4b8";
-  const statut = ROLES[u.role] || u.role;
+  const statut = u.role === "consul" && u.chef === true ? "Consul fondateur" : (ROLES[u.role] || u.role);
   return `<div class="carte-id" style="--cc:${coul}">
     <div class="ci-haut"><img src="embleme.png" alt=""><div><div class="ci-pays">PARCUM FŒDERATIO</div><div class="ci-type">${u.role === "visiteur" ? "Compte visiteur" : "Carte de citoyen"}</div></div></div>
     <div class="ci-nom">${esc(u.pseudo)}</div>
