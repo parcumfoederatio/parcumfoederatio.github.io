@@ -94,6 +94,7 @@
   .suite{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:34px 0 10px}
   .suite a{text-decoration:none;font-weight:600}
 
+  [hidden]{display:none!important}
   .nav-compte{background:rgba(255,255,255,.15);border-radius:99px;padding:5px 12px!important}
   .formu{display:grid;gap:14px;max-width:520px}
   .formu label{display:grid;gap:6px;font-size:.92rem;font-weight:600}

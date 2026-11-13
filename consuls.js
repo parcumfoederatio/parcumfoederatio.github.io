@@ -65,7 +65,7 @@ function afficherRegistre() {
   const liste = [...users].sort((a, b) => (a.citoyenNo ?? 9999) - (b.citoyenNo ?? 9999) || a.pseudo.localeCompare(b.pseudo));
   $("#registre").innerHTML = liste.map(u => `<tr>
     <td><b>${esc(u.pseudo)}</b><br><small>${numero(u.citoyenNo)}</small></td>
-    <td><select data-role="${u.id}" ${u.id === uid ? "disabled" : ""}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${v}</option>`).join("")}</select></td>
+    <td><select data-role="${u.id}" ${u.id === uid || !moi.chef ? "disabled" : ""}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${v}</option>`).join("")}</select></td>
     <td><select data-couleur="${u.id}"><option value="">—</option>${Object.keys(COULEURS).map(c => `<option ${u.couleur === c ? "selected" : ""}>${c}</option>`).join("")}</select></td>
     <td>${u.role === "citoyen" ? u.sparcs + " §" : "—"}</td></tr>`).join("");
   document.querySelectorAll("[data-role]").forEach(s => s.onchange = () => changer(s.dataset.role, { role: s.value }, s.value === "citoyen"));
@@ -73,6 +73,7 @@ function afficherRegistre() {
   $("#e-a").innerHTML = '<option value="">Choisir un citoyen…</option>' + liste.filter(u => u.role === "citoyen").map(u => `<option value="${u.id}">${esc(u.pseudo)} (${numero(u.citoyenNo)}) — ${u.sparcs} §</option>`).join("");
 }
 async function changer(id, champs, devientCitoyen) {
+  if (champs.role && !moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut changer les statuts.", "erreur");
   const u = users.find(x => x.id === id);
   if (devientCitoyen && u && u.citoyenNo == null) champs.citoyenNo = Math.max(0, ...users.map(x => x.citoyenNo || 0)) + 1;
   if (champs.role && champs.role !== "citoyen" && u?.sparcs) champs.sparcs = 0; // seuls les citoyens détiennent des Sparcs
