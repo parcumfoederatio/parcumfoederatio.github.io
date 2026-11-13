@@ -1,4 +1,4 @@
-import { auth, db, $, message, erreurFr } from "./parcum.js";
+import { auth, db, $, message, erreurFr } from "./parcum.js?v=4";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
