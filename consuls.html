@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace des Consuls — Parcum Fœderatio</title>
+<meta name="description" content="Espace réservé aux Consuls du MMT.">
+<link rel="icon" type="image/png" href="embleme.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="barre sans">
+  <div class="in">
+    <a href="index.html"><img src="embleme.png" alt="Emblème"></a>
+    <a class="nom" href="index.html">PARCUM FŒDERATIO</a>
+    <button class="menu-btn" onclick="document.getElementById('nav').classList.toggle('ouvert')">Menu</button>
+    <nav id="nav">
+      <a href="index.html">Accueil</a>
+      <a href="mmt.html">Le MMT</a>
+      <a href="institutions.html">Institutions</a>
+      <a href="territoires.html">Territoires</a>
+      <a href="carte.html">Carte</a>
+      <a href="economie.html">Économie</a>
+      <a href="constitution.html">Constitution</a>
+      <a href="decrets.html">Décrets</a>
+      <a href="citoyennete.html">Citoyenneté</a>
+      <a href="compte.html" class="nav-compte">👤 Mon compte</a>
+    </nav>
+  </div>
+</header>
+<div class="tete"><div class="in"><div class="kicker sans">Accès réservé</div><h1>Espace des Consuls</h1><div class="fil sans"><a href="index.html">Accueil</a> › Espace des Consuls</div></div></div><main><section>
+<div id="refus" class="panneau-compte" hidden><h2>Accès réservé</h2><p>Cet espace est réservé aux Consuls du MMT.</p><a class="doc-btn sans" href="compte.html">Retour à mon compte</a></div>
+<div id="espace" hidden>
+  <div class="onglets sans">
+    <button class="onglet on" data-v="p-demandes">Demandes<span class="nb" id="nb-demandes"></span></button>
+    <button class="onglet" data-v="p-brouillons">Décrets et votes</button>
+    <button class="onglet" data-v="p-registre">Registre</button>
+    <button class="onglet" data-v="p-economie">Économie</button>
+  </div>
+  <div id="p-demandes" class="panneau"><h2>Demandes de citoyenneté</h2><p class="mini">La citoyenneté est accordée quand les cinq Consuls ont signé. Chaque Consul peut mettre son veto (Constitution, art. 1).</p><div id="msg-demandes" class="sans"></div><div id="demandes" class="sans" style="margin-top:14px"></div></div>
+  <div id="p-brouillons" class="panneau" hidden><h2>Brouillons de décrets</h2>
+    <form id="f-brouillon" class="formu sans" style="max-width:none;margin:12px 0 22px"><label>Titre<input id="b-titre" maxlength="120" required placeholder="Décret n°0XX — …"></label><label>Contenu<textarea id="b-contenu" required></textarea></label><button class="btn" type="submit">Proposer au Conseil</button></form>
+    <div id="msg-brouillons" class="sans"></div><div id="brouillons"></div></div>
+  <div id="p-registre" class="panneau" hidden><h2>Registre des comptes</h2><p class="mini">Change le statut ou la couleur d'un compte (Décret n°004 : orange, rouge, mauve, bleu, magenta, noir).</p><div id="msg-registre" class="sans"></div>
+    <div class="defile"><table class="tableau sans"><thead><tr><th>Compte</th><th>Statut</th><th>Couleur</th><th>Sparcs</th></tr></thead><tbody id="registre"></tbody></table></div></div>
+  <div id="p-economie" class="panneau" hidden><h2>Économie</h2>
+    <p class="sans mini">Sparcs en circulation</p><div class="solde sans" id="circ">0 / 121 §</div><div class="barre-prog"><span id="circ-barre"></span></div>
+    <h3 style="margin-top:18px">Verser ou retirer des Sparcs</h3><p class="mini">Pour payer un citoyen qui travaille pour une Société d'État. Mets un montant négatif pour retirer.</p>
+    <form id="f-emission" class="formu sans" style="margin-top:10px"><label>Citoyen<select id="e-a" required></select></label><label>Montant (§)<input id="e-montant" type="number" step="1" required></label><label>Motif<input id="e-motif" maxlength="80" placeholder="Ex. : travail pour une Société d'État"></label><button class="btn" type="submit">Valider</button></form>
+    <div id="msg-eco" class="sans"></div><h3 style="margin-top:22px">Dernières transactions</h3><ul id="tx" class="histo sans"></ul></div>
+</div>
+</section></main>
+<script type="module" src="consuls.js"></script>
+<footer class="sans">
+  <div class="in">
+    <img src="embleme.png" alt="">
+    <div>
+      <strong>Parcum Fœderatio</strong> · Fédération du Parc<br>
+      <span class="petit">« Que le Parc nous accepte et nous guide » · Fondée le 26 mars 2025</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

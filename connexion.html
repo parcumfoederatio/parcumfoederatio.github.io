@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion — Parcum Fœderatio</title>
+<meta name="description" content="Connexion à ton compte Parcum Fœderatio.">
+<link rel="icon" type="image/png" href="embleme.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="barre sans">
+  <div class="in">
+    <a href="index.html"><img src="embleme.png" alt="Emblème"></a>
+    <a class="nom" href="index.html">PARCUM FŒDERATIO</a>
+    <button class="menu-btn" onclick="document.getElementById('nav').classList.toggle('ouvert')">Menu</button>
+    <nav id="nav">
+      <a href="index.html">Accueil</a>
+      <a href="mmt.html">Le MMT</a>
+      <a href="institutions.html">Institutions</a>
+      <a href="territoires.html">Territoires</a>
+      <a href="carte.html">Carte</a>
+      <a href="economie.html">Économie</a>
+      <a href="constitution.html">Constitution</a>
+      <a href="decrets.html">Décrets</a>
+      <a href="citoyennete.html">Citoyenneté</a>
+      <a href="compte.html" class="nav-compte">👤 Mon compte</a>
+    </nav>
+  </div>
+</header>
+<div class="tete"><div class="in"><div class="kicker sans">Mon compte</div><h1>Connexion</h1><div class="fil sans"><a href="index.html">Accueil</a> › Connexion</div></div></div><main><section>
+<div class="panneau-compte" style="max-width:560px">
+  <div class="onglets sans"><button class="onglet on" data-v="connexion">Se connecter</button><button class="onglet" data-v="inscription">Créer un compte</button></div>
+  <div id="msg" class="sans"></div>
+  <form id="f-connexion" class="formu sans">
+    <label>Courriel<input id="c-email" type="email" autocomplete="email" required></label>
+    <label>Mot de passe<input id="c-mdp" type="password" autocomplete="current-password" required></label>
+    <button class="btn" type="submit">Se connecter</button>
+    <button class="lien" type="button" id="oubli">Mot de passe oublié ?</button>
+  </form>
+  <form id="f-inscription" class="formu sans" hidden>
+    <label>Pseudo<input id="i-pseudo" maxlength="30" required placeholder="Le nom affiché sur ta carte"></label>
+    <label>Courriel<input id="i-email" type="email" autocomplete="email" required></label>
+    <label>Mot de passe (6 caractères minimum)<input id="i-mdp" type="password" autocomplete="new-password" minlength="6" required></label>
+    <label>Confirmer le mot de passe<input id="i-mdp2" type="password" autocomplete="new-password" minlength="6" required></label>
+    <p class="mini">Ton courriel sert seulement à te connecter. Il n'est jamais affiché sur le site.</p>
+    <button class="btn" type="submit">Créer mon compte</button>
+  </form>
+</div></section></main>
+<script type="module" src="connexion.js"></script>
+<footer class="sans">
+  <div class="in">
+    <img src="embleme.png" alt="">
+    <div>
+      <strong>Parcum Fœderatio</strong> · Fédération du Parc<br>
+      <span class="petit">« Que le Parc nous accepte et nous guide » · Fondée le 26 mars 2025</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
