@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="embleme.png">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="">
 <header class="barre sans">
   <div class="in">
     <a href="index.html"><img src="embleme.png" alt="Emblème"></a>
@@ -70,12 +70,19 @@
 
 <div class="panneau-compte">
   <h2>Mon profil</h2>
+  <div class="sans" style="margin-bottom:18px">
+    <p style="font-weight:600;margin-bottom:8px">Photo de la carte</p>
+    <label class="btn sec" style="display:inline-block">📷 Choisir une photo<input id="photo" type="file" accept="image/*" hidden></label>
+    <button class="btn danger" id="suppr-photo" type="button" hidden>Retirer la photo</button>
+    <p class="mini" style="margin-top:8px">La photo est recadrée en carré. Seuls toi et les Consuls peuvent la voir.</p>
+    <div id="msg-photo"></div>
+  </div>
   <form id="f-pseudo" class="formu sans"><label>Pseudo<input id="pseudo" maxlength="30" required></label><button class="btn sec" type="submit">Changer mon pseudo</button></form>
   <div id="msg-profil" class="sans"></div>
   <button class="btn danger sans" id="deco" style="margin-top:16px">Se déconnecter</button>
 </div>
 </section></main>
-<script type="module" src="compte.js?v=4"></script>
+<script type="module" src="compte.js?v=6"></script>
 <footer class="sans">
   <div class="in">
     <img src="embleme.png" alt="">

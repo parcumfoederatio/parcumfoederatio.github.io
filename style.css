@@ -131,7 +131,11 @@
   .ci-haut img{width:52px;height:52px;background:#fff;border-radius:50%;padding:3px}
   .ci-pays{font-family:-apple-system,Segoe UI,Arial,sans-serif;font-weight:800;letter-spacing:.12em;font-size:.95rem}
   .ci-type{font-family:-apple-system,Segoe UI,Arial,sans-serif;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--or)}
-  .ci-nom{font-size:1.8rem;margin:16px 0 12px;font-weight:700}
+  .ci-milieu{display:flex;align-items:center;gap:16px;margin:16px 0 14px}
+  .ci-photo{width:78px;height:78px;flex-shrink:0;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.18);border:3px solid var(--cc);color:rgba(255,255,255,.7);display:grid;place-items:center}
+  .ci-photo img{width:100%;height:100%;object-fit:cover;display:block}
+  .ci-photo svg{width:62%;height:62%}
+  .ci-nom{font-size:1.7rem;font-weight:700;line-height:1.15;position:relative;z-index:1}
   .ci-grille{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;font-family:-apple-system,Segoe UI,Arial,sans-serif}
   .ci-grille span{display:block;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;opacity:.75}
   .ci-grille b{font-size:.95rem}

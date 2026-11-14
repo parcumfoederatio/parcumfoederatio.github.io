@@ -1,17 +1,18 @@
-import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr } from "./parcum.js?v=4";
+import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr } from "./parcum.js?v=6";
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let moi = null, uid = null, stopDemande = null;
+let moi = null, uid = null, stopDemande = null, photo = null;
 
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "connexion.html" + location.search;
   uid = user.uid;
+  onSnapshot(doc(db, "photos", uid), s => { photo = s.exists() ? s.data().img : null; if (moi) $("#carte").innerHTML = carteHTML(moi, photo); $("#suppr-photo").hidden = !photo; }, () => {});
   onSnapshot(doc(db, "users", uid), snap => {
     if (!snap.exists()) { $("#carte").innerHTML = '<div class="msg erreur">Profil introuvable. Déconnecte-toi et reconnecte-toi.</div>'; return; }
     const ancien = moi?.role;
     moi = snap.data();
-    $("#carte").innerHTML = carteHTML(moi);
+    $("#carte").innerHTML = carteHTML(moi, photo);
     $("#pseudo").value = moi.pseudo;
     if (ancien !== moi.role) afficherRole();
     else if (moi.role === "citoyen") $("#solde").textContent = moi.sparcs;
@@ -105,3 +106,33 @@ $("#f-pseudo").onsubmit = async e => {
   catch (err) { message($("#msg-profil"), erreurFr(err), "erreur"); }
 };
 $("#deco").onclick = () => signOut(auth);
+
+// ---------- Photo de la carte ----------
+function reduire(fichier) {
+  return new Promise((ok, ko) => {
+    const img = new Image();
+    img.onload = () => {
+      const T = 320, c = document.createElement("canvas"); c.width = c.height = T;
+      const s = Math.min(img.width, img.height);
+      c.getContext("2d").drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, T, T);
+      URL.revokeObjectURL(img.src);
+      ok(c.toDataURL("image/jpeg", 0.82));
+    };
+    img.onerror = () => ko(new Error("Image illisible. Essaie une photo JPG ou PNG."));
+    img.src = URL.createObjectURL(fichier);
+  });
+}
+$("#photo").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  message($("#msg-photo"), "Envoi de la photo…", "info");
+  try {
+    const img = await reduire(f);
+    await setDoc(doc(db, "photos", uid), { img, majLe: serverTimestamp() });
+    message($("#msg-photo"), "Photo ajoutée à ta carte !", "ok");
+  } catch (err) { message($("#msg-photo"), erreurFr(err), "erreur"); }
+  e.target.value = "";
+};
+$("#suppr-photo").onclick = async () => {
+  try { await deleteDoc(doc(db, "photos", uid)); message($("#msg-photo"), "Photo retirée.", "ok"); }
+  catch (err) { message($("#msg-photo"), erreurFr(err), "erreur"); }
+};

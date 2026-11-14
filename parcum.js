@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js?v=4";
+import { firebaseConfig } from "./firebase-config.js?v=6";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -16,7 +16,7 @@ if (["localhost", "127.0.0.1"].includes(location.hostname) && new URLSearchParam
 
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 export const $ = s => document.querySelector(s);
-export const COULEURS = { orange: "#F28C28", rouge: "#C8090A", mauve: "#7B3FA0", bleu: "#2B4F9E", magenta: "#C2187A", noir: "#1b1b1f" };
+export const COULEURS = { orange: "#F28C28", rouge: "#C8090A", mauve: "#7B3FA0", bleu: "#2B4F9E", vert: "#1E6B3A", noir: "#1b1b1f" };
 export const ROLES = { visiteur: "Visiteur", citoyen: "Citoyen", consul: "Consul du MMT" };
 export const numero = n => n == null ? "—" : "PF-" + String(n).padStart(3, "0");
 export const dateFr = t => t?.toDate ? t.toDate().toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" }) : "—";
@@ -43,12 +43,15 @@ export function erreurFr(e) {
 }
 
 // Carte de citoyen numérique
-export function carteHTML(u) {
+export function carteHTML(u, photo) {
   const coul = COULEURS[u.couleur] || "#c9c4b8";
   const statut = u.role === "consul" && u.chef === true ? "Consul fondateur" : (ROLES[u.role] || u.role);
   return `<div class="carte-id" style="--cc:${coul}">
     <div class="ci-haut"><img src="embleme.png" alt=""><div><div class="ci-pays">PARCUM FŒDERATIO</div><div class="ci-type">${u.role === "visiteur" ? "Compte visiteur" : "Carte de citoyen"}</div></div></div>
-    <div class="ci-nom">${esc(u.pseudo)}</div>
+    <div class="ci-milieu">
+      <div class="ci-photo">${photo ? `<img src="${photo}" alt="Photo de ${esc(u.pseudo)}">` : `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="4.2" fill="currentColor"/><path d="M3.5 21c.9-4.4 4.3-6.8 8.5-6.8s7.6 2.4 8.5 6.8" fill="currentColor"/></svg>`}</div>
+      <div class="ci-nom">${esc(u.pseudo)}</div>
+    </div>
     <div class="ci-grille">
       <div><span>Statut</span><b>${esc(statut)}</b></div>
       <div><span>N° de citoyenneté</span><b>${numero(u.citoyenNo)}</b></div>
