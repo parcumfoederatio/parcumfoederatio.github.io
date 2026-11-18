@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sénat — Parcum Fœderatio</title>
+<meta name="description" content="Le Sénat de la Parcum Fœderatio : sénateurs, lois et actes provinciaux.">
+<link rel="icon" type="image/png" href="embleme.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="">
+<header class="barre sans">
+  <div class="in">
+    <a href="index.html"><img src="embleme.png" alt="Emblème"></a>
+    <a class="nom" href="index.html">PARCUM FŒDERATIO</a>
+    <button class="menu-btn" onclick="document.getElementById('nav').classList.toggle('ouvert')">Menu</button>
+    <nav id="nav">
+      <a href="index.html">Accueil</a>
+      <a href="mmt.html">Le MMT</a>
+      <a href="institutions.html">Institutions</a>
+      <a href="senat.html" class="actif">Sénat</a>
+      <a href="territoires.html">Territoires</a>
+      <a href="carte.html">Carte</a>
+      <a href="economie.html">Économie</a>
+      <a href="constitution.html">Constitution</a>
+      <a href="decrets.html">Décrets</a>
+      <a href="citoyennete.html">Citoyenneté</a>
+      <a href="compte.html" class="nav-compte">👤 Mon compte</a>
+    </nav>
+  </div>
+</header>
+<div class="tete"><div class="in"><div class="kicker sans">Législatif</div><h1>Le Sénat</h1><div class="fil sans"><a href="index.html">Accueil</a> › <a href="institutions.html">Institutions</a> › Sénat</div></div></div><main><section>
+<p>Le Sénat compte un sénateur par province, nommé à vie. Il rédige des lois et les vote à la majorité, puis le Conseil du MMT peut les modifier et les adopter : une loi adoptée devient un décret. Chaque sénateur peut aussi prendre des actes pour sa province, tant qu'ils ne contredisent ni un décret ni la Constitution. Le Conseil peut les annuler.</p>
+<div id="chargement" class="panneau-compte sans"><p class="vide">Chargement…</p></div>
+<div id="espace" hidden>
+  <div class="panneau-compte">
+    <h2>Composition</h2>
+    <p class="sans mini" id="presidence"></p>
+    <div class="defile"><table class="tableau sans"><thead><tr><th>Province</th><th>Sénateur</th></tr></thead><tbody id="sieges"></tbody></table></div>
+    <div id="z-election" class="sans" hidden style="margin-top:16px">
+      <h3>Élire le président du Sénat</h3>
+      <p class="mini">Le président est élu par les sénateurs et tranche les égalités. Tu peux changer ton vote quand tu veux.</p>
+      <form id="f-election" class="formu" style="margin-top:8px"><label>Mon choix<select id="e-candidat" required></select></label><button class="btn sec" type="submit">Voter</button></form>
+      <div id="msg-election"></div>
+    </div>
+  </div>
+
+  <div id="z-proposer" class="panneau-compte" hidden>
+    <h2>Proposer</h2>
+    <div class="onglets sans"><button class="onglet on" data-f="f-loi">Une loi</button><button class="onglet" data-f="f-acte">Un acte provincial</button></div>
+    <form id="f-loi" class="formu sans" style="max-width:none"><label>Titre<input id="l-titre" maxlength="120" required placeholder="Loi sur …"></label><label>Contenu<textarea id="l-contenu" maxlength="8000" required></textarea></label><button class="btn" type="submit">Soumettre au Sénat</button></form>
+    <form id="f-acte" class="formu sans" style="max-width:none" hidden><p class="mini" id="a-province"></p><label>Titre<input id="a-titre" maxlength="120" required placeholder="Acte provincial n°…"></label><label>Contenu<textarea id="a-contenu" maxlength="8000" required></textarea></label><button class="btn" type="submit">Prendre l'acte</button></form>
+    <div id="msg-proposer" class="sans"></div>
+  </div>
+
+  <div class="panneau-compte">
+    <div class="onglets sans" id="filtres">
+      <button class="onglet on" data-v="senat">Au Sénat<span class="nb" id="nb-senat"></span></button>
+      <button class="onglet" data-v="conseil">Au Conseil<span class="nb" id="nb-conseil"></span></button>
+      <button class="onglet" data-v="fini">Adoptées et rejetées</button>
+      <button class="onglet" data-v="actes">Actes provinciaux</button>
+    </div>
+    <div id="msg-lois" class="sans"></div>
+    <div id="lois"></div>
+  </div>
+</div>
+</section></main>
+<script type="module" src="senat.js?v=8"></script>
+<footer class="sans">
+  <div class="in">
+    <img src="embleme.png" alt="">
+    <div>
+      <strong>Parcum Fœderatio</strong> · Fédération du Parc<br>
+      <span class="petit">« Que le Parc nous accepte et nous guide » · Fondée le 26 mars 2025</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

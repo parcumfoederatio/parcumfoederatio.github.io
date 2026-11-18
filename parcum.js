@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js?v=7";
+import { firebaseConfig } from "./firebase-config.js?v=8";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -21,6 +21,10 @@ export const ROLES = { visiteur: "Visiteur", citoyen: "Citoyen", consul: "Consul
 export const numero = n => n == null ? "—" : "PF-" + String(n).padStart(3, "0");
 export const dateFr = t => t?.toDate ? t.toDate().toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" }) : "—";
 export const MAX_SPARCS = 121;
+// Sièges du Sénat : un par province ; les territoires ont un observateur sans droit de vote (Décret n°017)
+export const PROVINCES = ["Saint-Paul-de-la-Croix", "Ahuntsic", "Sauvé", "Fleury", "Guzzo", "Desjardins", "Gouin", "Toilettes mixtes du CVM"];
+export const TERRITOIRES = ["Place Fairfield"];
+export const estSenateurVotant = u => !!u && PROVINCES.includes(u.senat);
 // Nom officiel (prénom + nom) ; le pseudo sert de secours pour les vieux comptes
 export const nomOfficiel = u => [u?.prenom, u?.nom].filter(Boolean).join(" ") || u?.pseudo || "?";
 
@@ -47,7 +51,8 @@ export function erreurFr(e) {
 // Carte de citoyen numérique
 export function carteHTML(u, photo) {
   const coul = COULEURS[u.couleur] || "#c9c4b8";
-  const statut = u.role === "consul" && u.chef === true ? "Consul fondateur" : (ROLES[u.role] || u.role);
+  let statut = u.role === "consul" && u.chef === true ? "Consul fondateur" : (ROLES[u.role] || u.role);
+  if (u.senat) statut += TERRITOIRES.includes(u.senat) ? ` · Observateur de ${u.senat}` : ` · Sénateur de ${u.senat}`;
   return `<div class="carte-id" style="--cc:${coul}">
     <div class="ci-haut"><img src="embleme.png" alt=""><div><div class="ci-pays">PARCUM FŒDERATIO</div><div class="ci-type">${u.role === "visiteur" ? "Compte visiteur" : "Carte de citoyen"}</div></div></div>
     <div class="ci-milieu">

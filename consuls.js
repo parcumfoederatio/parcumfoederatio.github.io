@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel } from "./parcum.js?v=7";
+import { auth, db, $, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES } from "./parcum.js?v=8";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, updateDoc, addDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -68,7 +68,8 @@ function afficherRegistre() {
     <td>${moi.chef ? `<input class="nm" data-prenom="${u.id}" value="${esc(u.prenom || "")}" placeholder="Prénom" maxlength="40"> <input class="nm" data-nom="${u.id}" value="${esc(u.nom || "")}" placeholder="Nom" maxlength="40"><br><small>${esc(u.pseudo)}</small>` : `<b>${esc(nomOfficiel(u))}</b> <small>(${esc(u.pseudo)})</small>`}<br>${moi.chef ? `<small>PF-</small><input class="no" type="number" min="1" step="1" value="${u.citoyenNo ?? ""}" data-no="${u.id}">` : `<small>${numero(u.citoyenNo)}</small>`}</td>
     <td><select data-role="${u.id}" ${u.id === uid || !moi.chef ? "disabled" : ""}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${v}</option>`).join("")}</select></td>
     <td><select data-couleur="${u.id}"><option value="">—</option>${Object.keys(COULEURS).map(c => `<option ${u.couleur === c ? "selected" : ""}>${c}</option>`).join("")}</select></td>
-    <td>${u.role === "citoyen" ? u.sparcs + " §" : "—"}</td></tr>`).join("");
+    <td>${u.role === "citoyen" ? u.sparcs + " §" : "—"}</td>
+    <td><select data-senat="${u.id}" ${moi.chef ? "" : "disabled"}><option value="">—</option>${[...PROVINCES, ...TERRITOIRES].map(p => `<option ${u.senat === p ? "selected" : ""}>${esc(p)}</option>`).join("")}</select></td></tr>`).join("");
   document.querySelectorAll("[data-role]").forEach(s => s.onchange = () => {
     const u = users.find(x => x.id === s.dataset.role);
     if (!confirmer(`Changer le statut de ${u?.pseudo} en « ${ROLES[s.value]} » ?`)) { s.value = u?.role; return; }
@@ -86,6 +87,12 @@ function afficherRegistre() {
     if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut changer les noms.", "erreur");
     changer(i.dataset[ch], { [ch]: v || null });
   }));
+  document.querySelectorAll("[data-senat]").forEach(s => s.onchange = () => {
+    const u = users.find(x => x.id === s.dataset.senat), v = s.value || null;
+    if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut nommer les sénateurs.", "erreur");
+    if (!confirmer(v ? `Nommer ${nomOfficiel(u)} ${TERRITOIRES.includes(v) ? "observateur" : "sénateur"} de ${v} ?` : `Retirer ${nomOfficiel(u)} du Sénat ?`)) { s.value = u?.senat || ""; return; }
+    changer(s.dataset.senat, { senat: v });
+  });
   document.querySelectorAll("[data-couleur]").forEach(s => s.onchange = () => changer(s.dataset.couleur, { couleur: s.value || null }));
   $("#e-a").innerHTML = '<option value="">Choisir un citoyen…</option>' + liste.filter(u => u.role === "citoyen").map(u => `<option value="${u.id}">${esc(nomOfficiel(u))} (${numero(u.citoyenNo)}) — ${u.sparcs} §</option>`).join("");
 }
