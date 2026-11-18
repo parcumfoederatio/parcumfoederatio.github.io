@@ -1,10 +1,10 @@
-import { auth, db, $, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS } from "./parcum.js?v=6";
+import { auth, db, $, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel } from "./parcum.js?v=7";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, updateDoc, addDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let uid = null, moi = null, users = [];
 const prochainNo = () => Math.max(0, ...users.map(u => Number(u.citoyenNo) || 0)) + 1;
-const pseudoDe = id => users.find(u => u.id === id)?.pseudo || "?";
+const pseudoDe = id => nomOfficiel(users.find(u => u.id === id));
 
 onAuthStateChanged(auth, async user => {
   if (!user) return location.href = "connexion.html" + location.search;
@@ -35,7 +35,7 @@ function afficherDemandes(snap) {
       <p>Arrivée sur le territoire : ${esc(d.dateArrivee) || "—"} · Témoin : ${esc(d.temoin)}<br>Envoyée le ${dateFr(d.creeLe)}</p>
       <div class="barre-prog"><span style="width:${d.signatures.length * 20}%"></span></div>
       <p><b>${d.signatures.length} / 5</b> signatures${d.signatures.length ? " : " + d.signatures.map(s => esc(pseudoDe(s))).join(", ") : ""}</p>
-      <div class="actions">${signe ? '<span class="tag sans">Tu as signé ✓</span>' : `<button class="btn" data-signer="${d.id}">Signer</button>`}
+      <div class="actions">${signe ? '<span class="tag sans">Tu as signé ✓</span><span class="mini"> Tu peux encore mettre ton veto tant que la demande n\'est pas passée.</span>' : `<button class="btn" data-signer="${d.id}">Signer</button>`}
       <button class="btn danger" data-veto="${d.id}">Veto</button></div></div>`;
   }).join("") : '<p class="vide">Aucune demande en attente.</p>';
   document.querySelectorAll("[data-signer]").forEach(b => b.onclick = () => signer(b.dataset.signer));
@@ -65,7 +65,7 @@ function confirmer(t) { try { return window.confirm(t); } catch { return true; }
 function afficherRegistre() {
   const liste = [...users].sort((a, b) => (a.citoyenNo ?? 9999) - (b.citoyenNo ?? 9999) || a.pseudo.localeCompare(b.pseudo));
   $("#registre").innerHTML = liste.map(u => `<tr>
-    <td><b>${esc(u.pseudo)}</b><br>${moi.chef ? `<small>PF-</small><input class="no" type="number" min="1" step="1" value="${u.citoyenNo ?? ""}" data-no="${u.id}">` : `<small>${numero(u.citoyenNo)}</small>`}</td>
+    <td>${moi.chef ? `<input class="nm" data-prenom="${u.id}" value="${esc(u.prenom || "")}" placeholder="Prénom" maxlength="40"> <input class="nm" data-nom="${u.id}" value="${esc(u.nom || "")}" placeholder="Nom" maxlength="40"><br><small>${esc(u.pseudo)}</small>` : `<b>${esc(nomOfficiel(u))}</b> <small>(${esc(u.pseudo)})</small>`}<br>${moi.chef ? `<small>PF-</small><input class="no" type="number" min="1" step="1" value="${u.citoyenNo ?? ""}" data-no="${u.id}">` : `<small>${numero(u.citoyenNo)}</small>`}</td>
     <td><select data-role="${u.id}" ${u.id === uid || !moi.chef ? "disabled" : ""}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${v}</option>`).join("")}</select></td>
     <td><select data-couleur="${u.id}"><option value="">—</option>${Object.keys(COULEURS).map(c => `<option ${u.couleur === c ? "selected" : ""}>${c}</option>`).join("")}</select></td>
     <td>${u.role === "citoyen" ? u.sparcs + " §" : "—"}</td></tr>`).join("");
@@ -81,8 +81,13 @@ function afficherRegistre() {
     if (v != null && pris) { i.value = users.find(x => x.id === i.dataset.no)?.citoyenNo ?? ""; return message($("#msg-registre"), `Le numéro ${numero(v)} appartient déjà à ${pris.pseudo}.`, "erreur"); }
     changer(i.dataset.no, { citoyenNo: v });
   });
+  ["prenom", "nom"].forEach(ch => document.querySelectorAll(`[data-${ch}]`).forEach(i => i.onchange = () => {
+    const v = i.value.trim().slice(0, 40);
+    if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut changer les noms.", "erreur");
+    changer(i.dataset[ch], { [ch]: v || null });
+  }));
   document.querySelectorAll("[data-couleur]").forEach(s => s.onchange = () => changer(s.dataset.couleur, { couleur: s.value || null }));
-  $("#e-a").innerHTML = '<option value="">Choisir un citoyen…</option>' + liste.filter(u => u.role === "citoyen").map(u => `<option value="${u.id}">${esc(u.pseudo)} (${numero(u.citoyenNo)}) — ${u.sparcs} §</option>`).join("");
+  $("#e-a").innerHTML = '<option value="">Choisir un citoyen…</option>' + liste.filter(u => u.role === "citoyen").map(u => `<option value="${u.id}">${esc(nomOfficiel(u))} (${numero(u.citoyenNo)}) — ${u.sparcs} §</option>`).join("");
 }
 async function changer(id, champs, devientCitoyen) {
   if (champs.role && !moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut changer les statuts.", "erreur");
@@ -132,6 +137,8 @@ function afficherBrouillons(snap) {
       <h3>${esc(x.titre)}</h3><p class="contenu">${esc(x.contenu).replace(/\n/g, "<br>")}</p>
       <p><small>Proposé par ${esc(x.auteurP)} · ${dateFr(x.creeLe)}</small></p>
       <p><b>Pour : ${pour}</b> · <b>Contre : ${contre}</b> · Majorité : 3 Consuls sur 5</p>
+      ${moi.chef ? `<div class="qui-vote sans"><b>Qui a voté</b> (visible seulement par toi) :<br>${Object.entries(x.votes || {}).map(([id, vv]) => `${vv === "pour" ? "✅" : "❌"} ${esc(pseudoDe(id))}`).join("<br>") || "Personne encore."}</div>` : ""}
+      ${mien && x.statut === "ouvert" ? `<p class="mini">Tu as voté <b>${mien}</b>. Tu peux changer ton vote tant que le décret n'est pas passé.</p>` : ""}
       <div class="actions">${x.statut === "ouvert" ? `<button class="btn ${mien === "pour" ? "" : "sec"}" data-vote="${x.id}" data-v="pour">Pour</button>
       <button class="btn ${mien === "contre" ? "danger" : "sec"}" data-vote="${x.id}" data-v="contre">Contre</button>` : ""}
       ${auteur && x.statut === "ouvert" ? `<button class="btn sec" data-statut="${x.id}" data-s="adopte">Marquer adopté</button><button class="btn sec" data-statut="${x.id}" data-s="rejete">Marquer rejeté</button>` : ""}
@@ -144,7 +151,7 @@ function afficherBrouillons(snap) {
 $("#f-brouillon").onsubmit = async e => {
   e.preventDefault();
   try {
-    await addDoc(collection(db, "brouillons"), { titre: $("#b-titre").value.trim(), contenu: $("#b-contenu").value.trim(), auteur: uid, auteurP: moi.pseudo, creeLe: serverTimestamp(), votes: {}, statut: "ouvert" });
+    await addDoc(collection(db, "brouillons"), { titre: $("#b-titre").value.trim(), contenu: $("#b-contenu").value.trim(), auteur: uid, auteurP: nomOfficiel(moi), creeLe: serverTimestamp(), votes: {}, statut: "ouvert" });
     e.target.reset(); message($("#msg-brouillons"), "Brouillon proposé au Conseil.", "ok");
   } catch (err) { message($("#msg-brouillons"), erreurFr(err), "erreur"); }
 };

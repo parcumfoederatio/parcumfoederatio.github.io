@@ -1,4 +1,4 @@
-import { auth, db, $, message, erreurFr } from "./parcum.js?v=6";
+import { auth, db, $, message, erreurFr } from "./parcum.js?v=7";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -21,14 +21,15 @@ $("#f-connexion").onsubmit = async e => {
 
 $("#f-inscription").onsubmit = async e => {
   e.preventDefault();
-  const pseudo = $("#i-pseudo").value.trim();
+  const pseudo = $("#i-pseudo").value.trim(), prenom = $("#i-prenom").value.trim(), nom = $("#i-nom").value.trim();
+  if (!prenom || !nom || prenom.length > 40 || nom.length > 40) return message($("#msg"), "Écris ton prénom et ton nom de famille (40 caractères max chacun).", "erreur");
   if (pseudo.length < 2 || pseudo.length > 30) return message($("#msg"), "Le pseudo doit avoir entre 2 et 30 caractères.", "erreur");
   if ($("#i-mdp").value !== $("#i-mdp2").value) return message($("#msg"), "Les deux mots de passe sont différents.", "erreur");
   enCreation = true;
   try {
     const cred = await createUserWithEmailAndPassword(auth, $("#i-email").value.trim(), $("#i-mdp").value);
     await updateProfile(cred.user, { displayName: pseudo });
-    await setDoc(doc(db, "users", cred.user.uid), { pseudo, role: "visiteur", citoyenNo: null, couleur: null, sparcs: 0, creeLe: serverTimestamp(), derniereTx: null });
+    await setDoc(doc(db, "users", cred.user.uid), { pseudo, prenom, nom, role: "visiteur", citoyenNo: null, couleur: null, sparcs: 0, creeLe: serverTimestamp(), derniereTx: null });
     suite();
   } catch (err) { enCreation = false; message($("#msg"), erreurFr(err), "erreur"); }
 };

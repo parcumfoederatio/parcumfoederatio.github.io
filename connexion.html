@@ -39,7 +39,10 @@
     <button class="lien" type="button" id="oubli">Mot de passe oublié ?</button>
   </form>
   <form id="f-inscription" class="formu sans" hidden>
-    <label>Pseudo<input id="i-pseudo" maxlength="30" required placeholder="Le nom affiché sur ta carte"></label>
+    <label>Prénom<input id="i-prenom" maxlength="40" autocomplete="given-name" required></label>
+    <label>Nom de famille<input id="i-nom" maxlength="40" autocomplete="family-name" required></label>
+    <label>Pseudo<input id="i-pseudo" maxlength="30" required placeholder="Ton surnom sur le site"></label>
+    <p class="mini">Ton prénom et ton nom apparaissent sur ta carte de citoyenneté.</p>
     <label>Courriel<input id="i-email" type="email" autocomplete="email" required></label>
     <label>Mot de passe (6 caractères minimum)<input id="i-mdp" type="password" autocomplete="new-password" minlength="6" required></label>
     <label>Confirmer le mot de passe<input id="i-mdp2" type="password" autocomplete="new-password" minlength="6" required></label>
@@ -47,7 +50,7 @@
     <button class="btn" type="submit">Créer mon compte</button>
   </form>
 </div></section></main>
-<script type="module" src="connexion.js?v=6"></script>
+<script type="module" src="connexion.js?v=7"></script>
 <footer class="sans">
   <div class="in">
     <img src="embleme.png" alt="">

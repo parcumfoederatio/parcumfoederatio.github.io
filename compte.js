@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr } from "./parcum.js?v=6";
+import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel } from "./parcum.js?v=7";
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -14,6 +14,7 @@ onAuthStateChanged(auth, user => {
     moi = snap.data();
     $("#carte").innerHTML = carteHTML(moi, photo);
     $("#pseudo").value = moi.pseudo;
+    if (!$("#d-nom").value && (moi.prenom || moi.nom)) $("#d-nom").value = nomOfficiel(moi);
     if (ancien !== moi.role) afficherRole();
     else if (moi.role === "citoyen") $("#solde").textContent = moi.sparcs;
   });
