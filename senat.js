@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, PROVINCES, TERRITOIRES, estSenateurVotant } from "./parcum.js?v=9";
+import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, PROVINCES, TERRITOIRES, estSenateurVotant } from "./parcum.js?v=10";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 

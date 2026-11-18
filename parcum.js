@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js?v=9";
+import { firebaseConfig } from "./firebase-config.js?v=10";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -52,6 +52,7 @@ export function erreurFr(e) {
 export function carteHTML(u, photo) {
   const coul = COULEURS[u.couleur] || "#c9c4b8";
   let statut = u.role === "consul" && u.chef === true ? "Consul fondateur" : (ROLES[u.role] || u.role);
+  if (u.juge && !u.chef) statut += " · Juge suppléant";
   if (u.senat) statut += TERRITOIRES.includes(u.senat) ? ` · Observateur de ${u.senat}` : ` · Sénateur de ${u.senat}`;
   return `<div class="carte-id" style="--cc:${coul}">
     <div class="ci-haut"><img src="embleme.png" alt=""><div><div class="ci-pays">PARCUM FŒDERATIO</div><div class="ci-type">${u.role === "visiteur" ? "Compte visiteur" : "Carte de citoyen"}</div></div></div>

@@ -1,0 +1,193 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    function connecte() { return request.auth != null; }
+    function moi() { return get(/databases/$(db)/documents/users/$(request.auth.uid)).data; }
+    function existe() { return connecte() && exists(/databases/$(db)/documents/users/$(request.auth.uid)); }
+    function estConsul() { return existe() && moi().role == 'consul'; }
+    function estChef() { return estConsul() && moi().get('chef', false) == true; }
+    function seulement(champs) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(champs); }
+    function change(champs) { return request.resource.data.diff(resource.data).affectedKeys().hasAny(champs); }
+    function texte(v, min, max) { return v is string && v.size() >= min && v.size() <= max; }
+    function provinces() { return ['Saint-Paul-de-la-Croix','Ahuntsic','Sauvé','Fleury','Guzzo','Desjardins','Gouin','Toilettes mixtes du CVM']; }
+    function senateurVotant() { return existe() && moi().get('senat', null) in provinces(); }
+    function senateur() { return existe() && moi().get('senat', null) != null; }
+
+    match /users/{uid} {
+      allow read: if connecte();
+      allow create: if connecte() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['pseudo','prenom','nom','role','citoyenNo','couleur','sparcs','creeLe','derniereTx'])
+        && texte(request.resource.data.pseudo, 2, 30)
+        && texte(request.resource.data.prenom, 1, 40)
+        && texte(request.resource.data.nom, 1, 40)
+        && request.resource.data.role == 'visiteur'
+        && request.resource.data.citoyenNo == null
+        && request.resource.data.couleur == null
+        && request.resource.data.sparcs == 0
+        && request.resource.data.derniereTx == null
+        && request.resource.data.creeLe == request.time;
+      allow update: if estConsul()
+        && !change(['chef'])
+        && (!change(['prenom','nom','senat','juge']) || estChef())
+        && (!change(['role'])
+            || estChef()
+            || (resource.data.role in ['visiteur','resident'] && request.resource.data.role == 'citoyen'
+                && getAfter(/databases/$(db)/documents/demandes/$(uid)).data.statut == 'acceptee'
+                && getAfter(/databases/$(db)/documents/demandes/$(uid)).data.signatures.size() >= 5));
+      allow update: if connecte() && request.auth.uid == uid && seulement(['pseudo'])
+        && texte(request.resource.data.pseudo, 2, 30);
+      allow update: if connecte() && request.auth.uid == uid && seulement(['sparcs','derniereTx'])
+        && txValide(request.resource.data.derniereTx, uid, true);
+      allow update: if connecte() && request.auth.uid != uid && seulement(['sparcs','derniereTx'])
+        && txValide(request.resource.data.derniereTx, uid, false);
+    }
+
+    function txValide(txId, uid, payeur) {
+      let chemin = /databases/$(db)/documents/transactions/$(txId);
+      let tx = getAfter(chemin).data;
+      return txId is string && !exists(chemin) && existsAfter(chemin)
+        && tx.de == request.auth.uid
+        && (payeur
+              ? (tx.de == uid && request.resource.data.sparcs == resource.data.sparcs - tx.montant)
+              : (tx.a == uid && request.resource.data.sparcs == resource.data.sparcs + tx.montant));
+    }
+
+    match /transactions/{txId} {
+      allow read: if connecte() && (resource.data.de == request.auth.uid || resource.data.a == request.auth.uid || estConsul());
+      allow create: if connecte()
+        && request.resource.data.keys().hasOnly(['de','a','montant','date','deP','aP','motif'])
+        && request.resource.data.de == request.auth.uid
+        && request.resource.data.a != request.auth.uid
+        && request.resource.data.montant is int && request.resource.data.montant > 0
+        && request.resource.data.date == request.time
+        && moi().role == 'citoyen'
+        && get(/databases/$(db)/documents/users/$(request.resource.data.a)).data.role == 'citoyen'
+        && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.derniereTx == txId
+        && getAfter(/databases/$(db)/documents/users/$(request.resource.data.a)).data.derniereTx == txId
+        && getAfter(/databases/$(db)/documents/users/$(request.auth.uid)).data.sparcs >= 0;
+      allow create: if estConsul()
+        && request.resource.data.de == 'etat'
+        && request.resource.data.montant is int && request.resource.data.montant != 0
+        && request.resource.data.date == request.time;
+    }
+
+    match /demandes/{uid} {
+      allow read: if connecte() && (request.auth.uid == uid || estConsul());
+      allow create: if connecte() && request.auth.uid == uid
+        && moi().role in ['visiteur','resident']
+        && request.resource.data.keys().hasOnly(['nomComplet','pseudo','dateArrivee','temoin','allegeance','statut','signatures','veto','creeLe'])
+        && request.resource.data.allegeance == true
+        && request.resource.data.statut == 'en attente'
+        && request.resource.data.signatures.size() == 0
+        && request.resource.data.veto == null
+        && request.resource.data.nomComplet is string && request.resource.data.nomComplet.size() <= 80
+        && request.resource.data.temoin is string && request.resource.data.temoin.size() <= 80
+        && request.resource.data.creeLe == request.time;
+      allow update: if estConsul();
+      allow delete: if connecte() && ((request.auth.uid == uid && resource.data.statut != 'acceptee') || estConsul());
+    }
+
+    match /brouillons/{id} {
+      allow read: if estConsul();
+      allow create: if estConsul() && request.resource.data.auteur == request.auth.uid;
+      allow update: if estConsul() && (
+        resource.data.auteur == request.auth.uid
+        || (seulement(['votes']) && request.resource.data.votes.diff(resource.data.votes).affectedKeys().hasOnly([request.auth.uid]))
+      );
+      allow delete: if estConsul() && resource.data.auteur == request.auth.uid;
+    }
+
+    match /photos/{uid} {
+      allow read: if connecte() && (request.auth.uid == uid || estConsul());
+      allow create, update: if connecte() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['img','majLe'])
+        && request.resource.data.img is string
+        && request.resource.data.img.size() < 300000
+        && request.resource.data.img.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')
+        && request.resource.data.majLe == request.time;
+      allow delete: if connecte() && (request.auth.uid == uid || estConsul());
+    }
+
+    // ---------- Sénat ----------
+    match /senat/presidence {
+      allow read: if connecte();
+      allow create: if senateurVotant()
+        && request.resource.data.keys().hasOnly(['votes'])
+        && request.resource.data.votes.keys().hasOnly([request.auth.uid]);
+      allow update: if senateurVotant() && seulement(['votes'])
+        && request.resource.data.votes.diff(resource.data.votes).affectedKeys().hasOnly([request.auth.uid]);
+    }
+
+    match /lois/{id} {
+      allow read: if connecte();
+      allow create: if connecte()
+        && request.resource.data.keys().hasOnly(['type','province','titre','contenu','statut','auteur','auteurP','creeLe','votesSenat','votesConseil'])
+        && request.resource.data.auteur == request.auth.uid
+        && texte(request.resource.data.titre, 1, 120)
+        && texte(request.resource.data.contenu, 1, 8000)
+        && request.resource.data.creeLe == request.time
+        && request.resource.data.votesSenat.size() == 0
+        && request.resource.data.votesConseil.size() == 0
+        && ((request.resource.data.type == 'loi' && (senateurVotant() || estChef())
+              && request.resource.data.statut == 'senat' && request.resource.data.province == null)
+          || (request.resource.data.type == 'acte' && request.resource.data.statut == 'en vigueur'
+              && ((senateur() && request.resource.data.province == moi().senat)
+                  || (estChef() && request.resource.data.province in provinces().concat(['Place Fairfield'])))));
+      // Vote des sénateurs, tant que la loi est au Sénat
+      allow update: if senateurVotant()
+        && resource.data.type == 'loi' && resource.data.statut == 'senat'
+        && seulement(['votesSenat','statut'])
+        && request.resource.data.votesSenat.diff(resource.data.votesSenat).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.votesSenat[request.auth.uid] in ['pour','contre']
+        && request.resource.data.statut in ['senat','conseil','rejetee'];
+      // Conseil du MMT : vote, modifie le texte, annule les actes provinciaux
+      allow update: if estConsul()
+        && !change(['auteur','auteurP','type','province','creeLe','votesSenat'])
+        && request.resource.data.votesConseil.diff(resource.data.votesConseil).affectedKeys().hasOnly([request.auth.uid])
+        && ((resource.data.type == 'loi' && resource.data.statut == 'conseil'
+              && request.resource.data.statut in ['conseil','adoptee','rejetee'])
+          || (resource.data.type == 'acte' && resource.data.statut == 'en vigueur'
+              && seulement(['statut']) && request.resource.data.statut == 'annule'));
+      // Consul fondateur : accès complet
+      allow update: if estChef() && !change(['auteur','creeLe','type']);
+      allow delete: if connecte() && (estChef() || (resource.data.auteur == request.auth.uid
+        && (resource.data.statut == 'senat' || resource.data.type == 'acte')));
+    }
+
+    // ---------- Cour suprême ----------
+    match /affaires/{id} {
+      allow read: if connecte();
+      allow create: if existe() && (moi().role in ['citoyen','consul','resident'] || estChef())
+        && request.resource.data.keys().hasOnly(['numero','type','titre','demandeur','demandeurP','defendeur','defendeurP','faits','demande','textes','statut','creeLe','reponse','jugement','verdict','sanction','juge','jugeP','jugeLe'])
+        && request.resource.data.demandeur == request.auth.uid
+        && request.resource.data.type in ['plainte','doleance']
+        && request.resource.data.numero is int
+        && texte(request.resource.data.titre, 1, 120)
+        && texte(request.resource.data.faits, 1, 8000)
+        && texte(request.resource.data.demande, 1, 3000)
+        && texte(request.resource.data.textes, 0, 200)
+        && request.resource.data.statut == 'deposee'
+        && request.resource.data.creeLe == request.time
+        && request.resource.data.reponse == null && request.resource.data.jugement == null
+        && request.resource.data.verdict == null && request.resource.data.sanction == null
+        && request.resource.data.juge == null;
+      // Le défendeur répond, tant que l'affaire n'est pas jugée
+      allow update: if connecte() && resource.data.defendeur == request.auth.uid
+        && resource.data.statut in ['deposee','en cours'] && seulement(['reponse'])
+        && texte(request.resource.data.reponse, 1, 8000);
+      // Le demandeur retire son affaire
+      allow update: if connecte() && resource.data.demandeur == request.auth.uid
+        && resource.data.statut in ['deposee','en cours'] && seulement(['statut'])
+        && request.resource.data.statut == 'retiree';
+      // Un juge suppléant juge, s'il n'est pas partie à l'affaire
+      allow update: if existe() && moi().get('juge', false) == true
+        && resource.data.demandeur != request.auth.uid && resource.data.defendeur != request.auth.uid
+        && !change(['numero','type','demandeur','demandeurP','defendeur','defendeurP','faits','demande','textes','creeLe','reponse'])
+        && request.resource.data.statut in ['deposee','en cours','jugee','irrecevable'];
+      // Consul fondateur (juge en chef) : accès complet
+      allow update: if estChef() && !change(['creeLe']);
+      allow delete: if estChef();
+    }
+  }
+}

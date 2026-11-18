@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES } from "./parcum.js?v=9";
+import { auth, db, $, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES } from "./parcum.js?v=10";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, updateDoc, addDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -69,6 +69,7 @@ function afficherRegistre() {
     <td><select data-role="${u.id}" ${u.id === uid || !moi.chef ? "disabled" : ""}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${v}</option>`).join("")}</select></td>
     <td><select data-couleur="${u.id}"><option value="">—</option>${Object.keys(COULEURS).map(c => `<option ${u.couleur === c ? "selected" : ""}>${c}</option>`).join("")}</select></td>
     <td>${u.role === "citoyen" ? u.sparcs + " §" : "—"}</td>
+    <td><input type="checkbox" data-juge="${u.id}" ${u.juge ? "checked" : ""} ${moi.chef && !u.chef ? "" : "disabled"} title="Juge suppléant de la Cour suprême"></td>
     <td><select data-senat="${u.id}" ${moi.chef ? "" : "disabled"}><option value="">—</option>${[...PROVINCES, ...TERRITOIRES].map(p => `<option ${u.senat === p ? "selected" : ""}>${esc(p)}</option>`).join("")}</select></td></tr>`).join("");
   document.querySelectorAll("[data-role]").forEach(s => s.onchange = () => {
     const u = users.find(x => x.id === s.dataset.role);
@@ -87,6 +88,12 @@ function afficherRegistre() {
     if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut changer les noms.", "erreur");
     changer(i.dataset[ch], { [ch]: v || null });
   }));
+  document.querySelectorAll("[data-juge]").forEach(c => c.onchange = () => {
+    const u = users.find(x => x.id === c.dataset.juge);
+    if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut nommer les juges.", "erreur");
+    if (!confirmer(c.checked ? `Nommer ${nomOfficiel(u)} juge suppléant de la Cour suprême ?` : `Retirer ${nomOfficiel(u)} des juges ?`)) { c.checked = !c.checked; return; }
+    changer(c.dataset.juge, { juge: c.checked });
+  });
   document.querySelectorAll("[data-senat]").forEach(s => s.onchange = () => {
     const u = users.find(x => x.id === s.dataset.senat), v = s.value || null;
     if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut nommer les sénateurs.", "erreur");
