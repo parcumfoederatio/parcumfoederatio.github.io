@@ -49,7 +49,7 @@
     <h2>Proposer</h2>
     <div class="onglets sans"><button class="onglet on" data-f="f-loi">Une loi</button><button class="onglet" data-f="f-acte">Un acte provincial</button></div>
     <form id="f-loi" class="formu sans" style="max-width:none"><label>Titre<input id="l-titre" maxlength="120" required placeholder="Loi sur …"></label><label>Contenu<textarea id="l-contenu" maxlength="8000" required></textarea></label><button class="btn" type="submit">Soumettre au Sénat</button></form>
-    <form id="f-acte" class="formu sans" style="max-width:none" hidden><p class="mini" id="a-province"></p><label>Titre<input id="a-titre" maxlength="120" required placeholder="Acte provincial n°…"></label><label>Contenu<textarea id="a-contenu" maxlength="8000" required></textarea></label><button class="btn" type="submit">Prendre l'acte</button></form>
+    <form id="f-acte" class="formu sans" style="max-width:none" hidden><p class="mini" id="a-province"></p><label id="a-prov-l" hidden>Province ou territoire<select id="a-prov"></select></label><label>Titre<input id="a-titre" maxlength="120" required placeholder="Acte provincial n°…"></label><label>Contenu<textarea id="a-contenu" maxlength="8000" required></textarea></label><button class="btn" type="submit">Prendre l'acte</button></form>
     <div id="msg-proposer" class="sans"></div>
   </div>
 
@@ -65,7 +65,7 @@
   </div>
 </div>
 </section></main>
-<script type="module" src="senat.js?v=8"></script>
+<script type="module" src="senat.js?v=9"></script>
 <footer class="sans">
   <div class="in">
     <img src="embleme.png" alt="">

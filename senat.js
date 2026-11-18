@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, PROVINCES, TERRITOIRES, estSenateurVotant } from "./parcum.js?v=8";
+import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, PROVINCES, TERRITOIRES, estSenateurVotant } from "./parcum.js?v=9";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -57,13 +57,19 @@ $("#f-election").onsubmit = async e => {
 };
 
 // ---------- Proposer ----------
+const admin = () => moi?.chef === true; // le Consul fondateur a accès à tout
 function afficherProposer() {
-  const senateur = !!moi.senat, votant = estSenateurVotant(moi);
-  $("#z-proposer").hidden = !senateur;
-  if (!senateur) return;
+  const senateur = !!moi.senat, votant = estSenateurVotant(moi) || admin();
+  $("#z-proposer").hidden = !senateur && !admin();
+  if (!senateur && !admin()) return;
   document.querySelector('[data-f="f-loi"]').hidden = !votant;
   if (!votant) basculer("f-acte");
-  $("#a-province").textContent = `L'acte s'applique seulement à ${moi.senat}. Il entre en vigueur tout de suite, mais le Conseil du MMT peut l'annuler.`;
+  $("#a-prov-l").hidden = !admin();
+  if (admin()) {
+    const sel = $("#a-prov"), avant = sel.value || moi.senat || "";
+    sel.innerHTML = [...PROVINCES, ...TERRITOIRES].map(p => `<option ${p === avant ? "selected" : ""}>${esc(p)}</option>`).join("");
+    $("#a-province").textContent = "Accès fondateur : tu peux prendre un acte pour n'importe quelle province. Il entre en vigueur tout de suite.";
+  } else $("#a-province").textContent = `L'acte s'applique seulement à ${moi.senat}. Il entre en vigueur tout de suite, mais le Conseil du MMT peut l'annuler.`;
 }
 function basculer(id) {
   document.querySelectorAll("[data-f]").forEach(b => b.classList.toggle("on", b.dataset.f === id));
@@ -82,7 +88,7 @@ $("#f-loi").onsubmit = async e => {
 $("#f-acte").onsubmit = async e => {
   e.preventDefault();
   try {
-    await addDoc(collection(db, "lois"), { ...base(), type: "acte", province: moi.senat, titre: $("#a-titre").value.trim(), contenu: $("#a-contenu").value.trim(), statut: "en vigueur" });
+    await addDoc(collection(db, "lois"), { ...base(), type: "acte", province: admin() ? $("#a-prov").value : moi.senat, titre: $("#a-titre").value.trim(), contenu: $("#a-contenu").value.trim(), statut: "en vigueur" });
     e.target.reset(); message($("#msg-proposer"), "Acte provincial en vigueur.", "ok"); choisirVue("actes");
   } catch (err) { erreur("#msg-proposer", err); }
 };
@@ -135,7 +141,15 @@ function bloc(l) {
     if (monC) h += `<span class="mini">Tu as voté ${monC}. Tu peux changer tant que la loi n'est pas passée.</span>`;
   }
   if (l.type === "acte" && l.statut === "en vigueur" && consul) h += `<button class="btn danger" data-annuler="${l.id}">Annuler l'acte</button>`;
-  if (l.auteur === uid && (l.statut === "senat" || l.type === "acte")) h += `<button class="btn danger" data-suppr="${l.id}">Retirer</button>`;
+  if (admin()) {
+    h += '<span class="mini" style="width:100%">Accès fondateur :</span>';
+    if (l.statut === "senat") h += `<button class="btn sec" data-forcer="${l.id}" data-s="conseil">Envoyer au Conseil</button><button class="btn sec" data-forcer="${l.id}" data-s="rejetee">Rejeter</button>`;
+    if (l.statut === "conseil") h += `<button class="btn sec" data-forcer="${l.id}" data-s="adoptee">Adopter</button><button class="btn sec" data-forcer="${l.id}" data-s="rejetee">Rejeter</button>`;
+    if (["rejetee", "annule"].includes(l.statut)) h += `<button class="btn sec" data-forcer="${l.id}" data-s="${l.type === "acte" ? "en vigueur" : "senat"}">Rouvrir</button>`;
+    if (l.type === "acte" && l.statut === "en vigueur" && moi.role !== "consul") h += `<button class="btn danger" data-forcer="${l.id}" data-s="annule">Annuler l'acte</button>`;
+    if (moi.role !== "consul" || l.statut !== "conseil") h += `<button class="btn sec" data-modif="${l.id}">Modifier le texte</button>`;
+    h += `<button class="btn danger" data-suppr="${l.id}">Supprimer</button>`;
+  } else if (l.auteur === uid && (l.statut === "senat" || l.type === "acte")) h += `<button class="btn danger" data-suppr="${l.id}">Retirer</button>`;
   return h + "</div></div>";
 }
 
@@ -144,6 +158,11 @@ function brancher() {
   document.querySelectorAll("[data-vc]").forEach(b => b.onclick = () => voterConseil(b.dataset.vc, b.dataset.v));
   document.querySelectorAll("[data-annuler]").forEach(b => b.onclick = () => confirmer("Annuler cet acte provincial ?") && updateDoc(doc(db, "lois", b.dataset.annuler), { statut: "annule" }).catch(e => erreur("#msg-lois", e)));
   document.querySelectorAll("[data-suppr]").forEach(b => b.onclick = () => confirmer("Retirer ce texte ?") && deleteDoc(doc(db, "lois", b.dataset.suppr)).catch(e => erreur("#msg-lois", e)));
+  document.querySelectorAll("[data-forcer]").forEach(b => b.onclick = () => {
+    const s = b.dataset.s, champs = { statut: s };
+    if (s === "adoptee") champs.adopteeLe = serverTimestamp();
+    if (confirmer(`Changer le statut en « ${ETIQ[s]} » ?`)) updateDoc(doc(db, "lois", b.dataset.forcer), champs).catch(e => erreur("#msg-lois", e));
+  });
   document.querySelectorAll("[data-modif]").forEach(b => b.onclick = () => modifier(b.dataset.modif));
 }
 
