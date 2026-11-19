@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel } from "./parcum.js?v=10";
+import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel } from "./parcum.js?v=11";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { onSnapshot, collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
