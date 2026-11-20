@@ -1,6 +1,6 @@
-import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel } from "./parcum.js?v=11";
+import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel } from "./parcum.js?v=12";
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, onSnapshot, setDoc, updateDoc, deleteDoc, collection, query, where, getDocs, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, onSnapshot, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let moi = null, uid = null, stopDemande = null, photo = null;
 
@@ -9,7 +9,7 @@ onAuthStateChanged(auth, user => {
   uid = user.uid;
   onSnapshot(doc(db, "photos", uid), s => { photo = s.exists() ? s.data().img : null; if (moi) $("#carte").innerHTML = carteHTML(moi, photo); $("#suppr-photo").hidden = !photo; }, () => {});
   onSnapshot(doc(db, "users", uid), snap => {
-    if (!snap.exists()) { $("#carte").innerHTML = '<div class="msg erreur">Profil introuvable. Déconnecte-toi et reconnecte-toi.</div>'; return; }
+    if (!snap.exists()) return completerProfil(user);
     const ancien = moi?.role;
     moi = snap.data();
     $("#carte").innerHTML = carteHTML(moi, photo);
@@ -19,6 +19,28 @@ onAuthStateChanged(auth, user => {
     else if (moi.role === "citoyen") $("#solde").textContent = moi.sparcs;
   });
 });
+
+// Profil manquant (inscription interrompue) : on le complète ici
+function completerProfil(user) {
+  $("#carte").innerHTML = `<div class="panneau-compte"><h2>Complète ton profil</h2>
+    <p>Ton compte existe, mais ton profil n'a pas été enregistré. Remplis ces champs pour le terminer.</p>
+    <form id="f-profil" class="formu sans" style="margin-top:14px">
+      <label>Prénom<input id="pf-prenom" maxlength="40" autocomplete="given-name" required></label>
+      <label>Nom de famille<input id="pf-nom" maxlength="40" autocomplete="family-name" required></label>
+      <label>Pseudo<input id="pf-pseudo" maxlength="30" required value="${esc(user.displayName || "")}"></label>
+      <button class="btn" type="submit">Enregistrer mon profil</button>
+    </form><div id="msg-pf" class="sans"></div></div>`;
+  $("#f-profil").onsubmit = async e => {
+    e.preventDefault();
+    const prenom = $("#pf-prenom").value.trim(), nom = $("#pf-nom").value.trim(), pseudo = $("#pf-pseudo").value.trim();
+    if (pseudo.length < 2) return message($("#msg-pf"), "Le pseudo doit avoir entre 2 et 30 caractères.", "erreur");
+    try {
+      if ((await getDoc(doc(db, "users", user.uid))).exists()) return;
+      await setDoc(doc(db, "users", user.uid), { pseudo, prenom, nom, role: "visiteur", citoyenNo: null, couleur: null, sparcs: 0, creeLe: serverTimestamp(), derniereTx: null });
+      await updateProfile(user, { displayName: pseudo });
+    } catch (err) { message($("#msg-pf"), erreurFr(err) + (err?.code ? ` (code : ${err.code})` : ""), "erreur"); }
+  };
+}
 
 function afficherRole() {
   ["#z-visiteur", "#z-citoyen", "#z-consul"].forEach(z => $(z).hidden = true);

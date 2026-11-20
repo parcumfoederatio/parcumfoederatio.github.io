@@ -1,4 +1,4 @@
-import { auth, db, $, message, erreurFr } from "./parcum.js?v=11";
+import { auth, db, $, message, erreurFr } from "./parcum.js?v=12";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -31,7 +31,11 @@ $("#f-inscription").onsubmit = async e => {
     await updateProfile(cred.user, { displayName: pseudo });
     await setDoc(doc(db, "users", cred.user.uid), { pseudo, prenom, nom, role: "visiteur", citoyenNo: null, couleur: null, sparcs: 0, creeLe: serverTimestamp(), derniereTx: null });
     suite();
-  } catch (err) { enCreation = false; message($("#msg"), erreurFr(err), "erreur"); }
+  } catch (err) {
+    message($("#msg"), erreurFr(err) + (err?.code ? ` (code : ${err.code})` : ""), "erreur");
+    if (auth.currentUser) setTimeout(suite, 2500); // le compte existe : on finit le profil sur la page Mon compte
+    else enCreation = false;
+  }
 };
 
 $("#oubli").onclick = async () => {
