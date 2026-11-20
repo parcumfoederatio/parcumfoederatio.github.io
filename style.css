@@ -101,13 +101,14 @@
   /* Thèmes clairs (jaune, rose) : le texte passe en foncé pour rester lisible */
   body.theme-jaune{--rouge:#FBD700;--rouge-f:#e0c000;--texte-accent:#7a6200}
   body.theme-rose{--rouge:#EF889A;--rouge-f:#e06a80;--texte-accent:#a3334a}
+  body.theme-beige{--rouge:#E5CB9D;--rouge-f:#d4b47c;--texte-accent:#7a5a1f}
   body.clair header.barre{color:#1b1b1f;border-bottom-color:#C8090A}
   body.clair .barre nav a,body.clair .barre .nom,body.clair .menu-btn{color:#1b1b1f}
   body.clair .menu-btn{border-color:rgba(0,0,0,.4)}
   body.clair .barre nav{border-bottom-color:#C8090A}
   body.clair .nav-compte{background:rgba(0,0,0,.08)}
   body.clair a,body.clair .kicker,body.clair .tuile .fleche,body.clair .lien,body.clair .solde{color:var(--texte-accent)}
-  body.theme-rose header.barre,body.theme-rose .barre nav{border-bottom-color:var(--or)}
+  body.theme-rose header.barre,body.theme-rose .barre nav,body.theme-beige header.barre,body.theme-beige .barre nav{border-bottom-color:var(--or)}
   body.theme-rose .carte.r{border-top-color:#C8090A}
   body.clair .btn,body.clair .doc-btn,body.clair .onglet.on,body.clair .etape::before{color:#1b1b1f}
   .etoile-mmt{text-align:center;margin:44px 0 6px}
