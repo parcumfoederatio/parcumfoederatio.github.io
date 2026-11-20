@@ -1,11 +1,10 @@
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, PROVINCES, TERRITOIRES, estSenateurVotant } from "./parcum.js?v=12";
+import { auth, db, $, confirmer, esc, message, erreurFr, dateFr, nomOfficiel, PROVINCES, TERRITOIRES, estSenateurVotant } from "./parcum.js?v=13";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let uid = null, moi = null, users = [], lois = [], presidence = {}, vue = "senat";
 const nomDe = id => nomOfficiel(users.find(u => u.id === id));
 const votants = () => users.filter(estSenateurVotant);
-const confirmer = t => { try { return window.confirm(t); } catch { return true; } };
 const erreur = (el, e) => message($(el), erreurFr(e), "erreur");
 
 onAuthStateChanged(auth, user => {
@@ -156,12 +155,12 @@ function bloc(l) {
 function brancher() {
   document.querySelectorAll("[data-vs]").forEach(b => b.onclick = () => voterSenat(b.dataset.vs, b.dataset.v));
   document.querySelectorAll("[data-vc]").forEach(b => b.onclick = () => voterConseil(b.dataset.vc, b.dataset.v));
-  document.querySelectorAll("[data-annuler]").forEach(b => b.onclick = () => confirmer("Annuler cet acte provincial ?") && updateDoc(doc(db, "lois", b.dataset.annuler), { statut: "annule" }).catch(e => erreur("#msg-lois", e)));
-  document.querySelectorAll("[data-suppr]").forEach(b => b.onclick = () => confirmer("Retirer ce texte ?") && deleteDoc(doc(db, "lois", b.dataset.suppr)).catch(e => erreur("#msg-lois", e)));
-  document.querySelectorAll("[data-forcer]").forEach(b => b.onclick = () => {
+  document.querySelectorAll("[data-annuler]").forEach(b => b.onclick = async () => await confirmer("Annuler cet acte provincial ?") && updateDoc(doc(db, "lois", b.dataset.annuler), { statut: "annule" }).catch(e => erreur("#msg-lois", e)));
+  document.querySelectorAll("[data-suppr]").forEach(b => b.onclick = async () => await confirmer("Retirer ce texte ?") && deleteDoc(doc(db, "lois", b.dataset.suppr)).catch(e => erreur("#msg-lois", e)));
+  document.querySelectorAll("[data-forcer]").forEach(b => b.onclick = async () => {
     const s = b.dataset.s, champs = { statut: s };
     if (s === "adoptee") champs.adopteeLe = serverTimestamp();
-    if (confirmer(`Changer le statut en « ${ETIQ[s]} » ?`)) updateDoc(doc(db, "lois", b.dataset.forcer), champs).catch(e => erreur("#msg-lois", e));
+    if (await confirmer(`Changer le statut en « ${ETIQ[s]} » ?`)) updateDoc(doc(db, "lois", b.dataset.forcer), champs).catch(e => erreur("#msg-lois", e));
   });
   document.querySelectorAll("[data-modif]").forEach(b => b.onclick = () => modifier(b.dataset.modif));
 }

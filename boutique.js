@@ -1,9 +1,8 @@
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, MAX_SPARCS } from "./parcum.js?v=12";
+import { auth, db, $, confirmer, esc, message, erreurFr, dateFr, nomOfficiel, MAX_SPARCS } from "./parcum.js?v=13";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, query, where, addDoc, updateDoc, deleteDoc, runTransaction, writeBatch, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let uid = null, moi = null, produits = [], commandes = [], vue = "payee", stops = [];
-const confirmer = t => { try { return window.confirm(t); } catch { return true; } };
 const erreur = (el, e) => message($(el), erreurFr(e), "erreur");
 const consul = () => moi?.role === "consul";
 const citoyen = () => moi?.role === "citoyen";
@@ -59,7 +58,7 @@ function afficherProduits() {
   document.querySelectorAll("[data-acheter]").forEach(b => b.onclick = () => acheter(b.dataset.acheter));
   document.querySelectorAll("[data-editer]").forEach(b => b.onclick = () => editer(b.dataset.editer));
   document.querySelectorAll("[data-basculer]").forEach(b => b.onclick = () => { const p = produits.find(x => x.id === b.dataset.basculer); updateDoc(doc(db, "produits", p.id), { actif: !p.actif }).catch(e => erreur("#msg-produit", e)); });
-  document.querySelectorAll("[data-supprimer]").forEach(b => b.onclick = () => confirmer("Supprimer ce produit de la boutique ?") && deleteDoc(doc(db, "produits", b.dataset.supprimer)).catch(e => erreur("#msg-produit", e)));
+  document.querySelectorAll("[data-supprimer]").forEach(b => b.onclick = async () => await confirmer("Supprimer ce produit de la boutique ?") && deleteDoc(doc(db, "produits", b.dataset.supprimer)).catch(e => erreur("#msg-produit", e)));
 }
 
 async function acheter(id) {
@@ -68,7 +67,7 @@ async function acheter(id) {
   if (!(qte >= 1 && qte <= 10)) return message($("#msg-boutique"), "La quantité doit être entre 1 et 10.", "erreur");
   const total = p.prix * qte;
   if (total > moi.sparcs) return message($("#msg-boutique"), `Il te manque ${total - moi.sparcs} § pour cet achat.`, "erreur");
-  if (!confirmer(`Acheter ${qte} × ${p.nom} pour ${total} § ?`)) return;
+  if (!await confirmer(`Acheter ${qte} × ${p.nom} pour ${total} § ?`)) return;
   try {
     await runTransaction(db, async t => {
       const refMoi = doc(db, "users", uid), refP = doc(db, "produits", id);
@@ -132,12 +131,12 @@ function afficherCommandes() {
   document.querySelectorAll("[data-livrer]").forEach(b => b.onclick = () => updateDoc(doc(db, "commandes", b.dataset.livrer), { statut: "livree" }).catch(e => erreur("#msg-commandes", e)));
   document.querySelectorAll("[data-relivrer]").forEach(b => b.onclick = () => updateDoc(doc(db, "commandes", b.dataset.relivrer), { statut: "payee" }).catch(e => erreur("#msg-commandes", e)));
   document.querySelectorAll("[data-annuler]").forEach(b => b.onclick = () => annuler(b.dataset.annuler));
-  document.querySelectorAll("[data-effacer]").forEach(b => b.onclick = () => confirmer("Supprimer cette commande de l'historique ? (Ça ne rembourse pas.)") && deleteDoc(doc(db, "commandes", b.dataset.effacer)).catch(e => erreur("#msg-commandes", e)));
+  document.querySelectorAll("[data-effacer]").forEach(b => b.onclick = async () => await confirmer("Supprimer cette commande de l'historique ? (Ça ne rembourse pas.)") && deleteDoc(doc(db, "commandes", b.dataset.effacer)).catch(e => erreur("#msg-commandes", e)));
 }
 
 async function annuler(id) {
   const c = commandes.find(x => x.id === id); if (!c) return;
-  if (!confirmer(`Annuler la commande et rembourser ${c.total} § à ${c.acheteurP} ?`)) return;
+  if (!await confirmer(`Annuler la commande et rembourser ${c.total} § à ${c.acheteurP} ?`)) return;
   try {
     const cit = await getDocs(query(collection(db, "users"), where("role", "==", "citoyen")));
     const circ = cit.docs.reduce((s, d) => s + (d.data().sparcs || 0), 0);

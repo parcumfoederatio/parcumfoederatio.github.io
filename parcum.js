@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js?v=12";
+import { firebaseConfig } from "./firebase-config.js?v=13";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -46,6 +46,23 @@ export function erreurFr(e) {
     "permission-denied": "Action refusée : tu n'as pas la permission.",
   };
   return m[c] || ("Erreur : " + (e?.message || c));
+}
+
+// Confirmation dans la page (les fenêtres du navigateur peuvent être bloquées par Chrome)
+export function confirmer(texte) {
+  return new Promise(ok => {
+    const fond = document.createElement("div");
+    fond.className = "confirm-fond sans";
+    fond.innerHTML = `<div class="confirm-boite" role="dialog" aria-modal="true"><p>${esc(texte)}</p><div class="actions"><button class="btn" data-oui>Confirmer</button><button class="btn sec" data-non>Annuler</button></div></div>`;
+    const fin = r => { document.removeEventListener("keydown", touche); fond.remove(); ok(r); };
+    const touche = e => { if (e.key === "Escape") fin(false); if (e.key === "Enter") fin(true); };
+    fond.querySelector("[data-oui]").onclick = () => fin(true);
+    fond.querySelector("[data-non]").onclick = () => fin(false);
+    fond.onclick = e => { if (e.target === fond) fin(false); };
+    document.addEventListener("keydown", touche);
+    document.body.appendChild(fond);
+    fond.querySelector("[data-oui]").focus();
+  });
 }
 
 // Carte de citoyen numérique

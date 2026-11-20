@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES } from "./parcum.js?v=12";
+import { auth, db, $, confirmer, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES } from "./parcum.js?v=13";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, updateDoc, addDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -55,11 +55,10 @@ async function signer(id) {
   } catch (e) { message($("#msg-demandes"), erreurFr(e), "erreur"); }
 }
 async function veto(id) {
-  if (!confirmer("Mettre ton veto sur cette demande ? Elle sera refusée.")) return;
+  if (!await confirmer("Mettre ton veto sur cette demande ? Elle sera refusée.")) return;
   try { await updateDoc(doc(db, "demandes", id), { statut: "refusee", veto: uid }); }
   catch (e) { message($("#msg-demandes"), erreurFr(e), "erreur"); }
 }
-function confirmer(t) { try { return window.confirm(t); } catch { return true; } }
 
 // ---------- Registre ----------
 function afficherRegistre() {
@@ -71,9 +70,9 @@ function afficherRegistre() {
     <td>${u.role === "citoyen" ? u.sparcs + " §" : "—"}</td>
     <td><input type="checkbox" data-juge="${u.id}" ${u.juge ? "checked" : ""} ${moi.chef && !u.chef ? "" : "disabled"} title="Juge suppléant de la Cour suprême"></td>
     <td><select data-senat="${u.id}" ${moi.chef ? "" : "disabled"}><option value="">—</option>${[...PROVINCES, ...TERRITOIRES].map(p => `<option ${u.senat === p ? "selected" : ""}>${esc(p)}</option>`).join("")}</select></td></tr>`).join("");
-  document.querySelectorAll("[data-role]").forEach(s => s.onchange = () => {
+  document.querySelectorAll("[data-role]").forEach(s => s.onchange = async () => {
     const u = users.find(x => x.id === s.dataset.role);
-    if (!confirmer(`Changer le statut de ${u?.pseudo} en « ${ROLES[s.value]} » ?`)) { s.value = u?.role; return; }
+    if (!await confirmer(`Changer le statut de ${u?.pseudo} en « ${ROLES[s.value]} » ?`)) { s.value = u?.role; return; }
     changer(s.dataset.role, { role: s.value }, s.value === "citoyen");
   });
   document.querySelectorAll("[data-no]").forEach(i => i.onchange = () => {
@@ -88,16 +87,16 @@ function afficherRegistre() {
     if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut changer les noms.", "erreur");
     changer(i.dataset[ch], { [ch]: v || null });
   }));
-  document.querySelectorAll("[data-juge]").forEach(c => c.onchange = () => {
+  document.querySelectorAll("[data-juge]").forEach(c => c.onchange = async () => {
     const u = users.find(x => x.id === c.dataset.juge);
     if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut nommer les juges.", "erreur");
-    if (!confirmer(c.checked ? `Nommer ${nomOfficiel(u)} juge suppléant de la Cour suprême ?` : `Retirer ${nomOfficiel(u)} des juges ?`)) { c.checked = !c.checked; return; }
+    if (!await confirmer(c.checked ? `Nommer ${nomOfficiel(u)} juge suppléant de la Cour suprême ?` : `Retirer ${nomOfficiel(u)} des juges ?`)) { c.checked = !c.checked; return; }
     changer(c.dataset.juge, { juge: c.checked });
   });
-  document.querySelectorAll("[data-senat]").forEach(s => s.onchange = () => {
+  document.querySelectorAll("[data-senat]").forEach(s => s.onchange = async () => {
     const u = users.find(x => x.id === s.dataset.senat), v = s.value || null;
     if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut nommer les sénateurs.", "erreur");
-    if (!confirmer(v ? `Nommer ${nomOfficiel(u)} ${TERRITOIRES.includes(v) ? "observateur" : "sénateur"} de ${v} ?` : `Retirer ${nomOfficiel(u)} du Sénat ?`)) { s.value = u?.senat || ""; return; }
+    if (!await confirmer(v ? `Nommer ${nomOfficiel(u)} ${TERRITOIRES.includes(v) ? "observateur" : "sénateur"} de ${v} ?` : `Retirer ${nomOfficiel(u)} du Sénat ?`)) { s.value = u?.senat || ""; return; }
     changer(s.dataset.senat, { senat: v });
   });
   document.querySelectorAll("[data-couleur]").forEach(s => s.onchange = () => changer(s.dataset.couleur, { couleur: s.value || null }));
@@ -160,7 +159,7 @@ function afficherBrouillons(snap) {
   }).join("") : '<p class="vide">Aucun brouillon.</p>';
   document.querySelectorAll("[data-vote]").forEach(btn => btn.onclick = () => updateDoc(doc(db, "brouillons", btn.dataset.vote), { ["votes." + uid]: btn.dataset.v }).catch(e => message($("#msg-brouillons"), erreurFr(e), "erreur")));
   document.querySelectorAll("[data-statut]").forEach(btn => btn.onclick = () => updateDoc(doc(db, "brouillons", btn.dataset.statut), { statut: btn.dataset.s }).catch(e => message($("#msg-brouillons"), erreurFr(e), "erreur")));
-  document.querySelectorAll("[data-suppr]").forEach(btn => btn.onclick = () => confirmer("Supprimer ce brouillon ?") && deleteDoc(doc(db, "brouillons", btn.dataset.suppr)).catch(e => message($("#msg-brouillons"), erreurFr(e), "erreur")));
+  document.querySelectorAll("[data-suppr]").forEach(btn => btn.onclick = async () => await confirmer("Supprimer ce brouillon ?") && deleteDoc(doc(db, "brouillons", btn.dataset.suppr)).catch(e => message($("#msg-brouillons"), erreurFr(e), "erreur")));
 }
 $("#f-brouillon").onsubmit = async e => {
   e.preventDefault();

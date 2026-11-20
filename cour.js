@@ -1,10 +1,9 @@
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel } from "./parcum.js?v=12";
+import { auth, db, $, confirmer, esc, message, erreurFr, dateFr, nomOfficiel } from "./parcum.js?v=13";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { onSnapshot, collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let uid = null, moi = null, users = [], affaires = [], vue = "cours", edition = null;
 const nomDe = id => nomOfficiel(users.find(u => u.id === id));
-const confirmer = t => { try { return window.confirm(t); } catch { return true; } };
 const erreur = (el, e) => message($(el), erreurFr(e), "erreur");
 const admin = () => moi?.chef === true; // le Consul fondateur a accès à tout
 const estJuge = u => !!u && (u.chef === true || u.juge === true);
@@ -122,12 +121,12 @@ function formEdition(a) {
 function zone(id, html) { const z = document.querySelector(`[data-zone="${id}"]`); if (z) z.innerHTML = html; return z; }
 
 function brancher() {
-  document.querySelectorAll("[data-statut]").forEach(b => b.onclick = () => {
+  document.querySelectorAll("[data-statut]").forEach(b => b.onclick = async () => {
     const s = b.dataset.s;
-    if (confirmer(`Passer l'affaire à « ${ETIQ[s]} » ?`)) updateDoc(doc(db, "affaires", b.dataset.statut), { statut: s }).catch(e => erreur("#msg-affaires", e));
+    if (await confirmer(`Passer l'affaire à « ${ETIQ[s]} » ?`)) updateDoc(doc(db, "affaires", b.dataset.statut), { statut: s }).catch(e => erreur("#msg-affaires", e));
   });
-  document.querySelectorAll("[data-retirer]").forEach(b => b.onclick = () => confirmer("Retirer ton affaire ? La Cour ne la jugera pas.") && updateDoc(doc(db, "affaires", b.dataset.retirer), { statut: "retiree" }).catch(e => erreur("#msg-affaires", e)));
-  document.querySelectorAll("[data-suppr]").forEach(b => b.onclick = () => confirmer("Supprimer définitivement cette affaire ?") && deleteDoc(doc(db, "affaires", b.dataset.suppr)).catch(e => erreur("#msg-affaires", e)));
+  document.querySelectorAll("[data-retirer]").forEach(b => b.onclick = async () => await confirmer("Retirer ton affaire ? La Cour ne la jugera pas.") && updateDoc(doc(db, "affaires", b.dataset.retirer), { statut: "retiree" }).catch(e => erreur("#msg-affaires", e)));
+  document.querySelectorAll("[data-suppr]").forEach(b => b.onclick = async () => await confirmer("Supprimer définitivement cette affaire ?") && deleteDoc(doc(db, "affaires", b.dataset.suppr)).catch(e => erreur("#msg-affaires", e)));
   document.querySelectorAll("[data-modif]").forEach(b => b.onclick = () => { edition = b.dataset.modif; afficher(); });
   document.querySelectorAll("[data-fermer]").forEach(b => b.onclick = () => { edition = null; afficher(); });
   document.querySelectorAll("[data-edit]").forEach(f => f.onsubmit = async e => {
@@ -153,7 +152,7 @@ function brancher() {
     const f = z.querySelector("form"); f.querySelector('button[type="button"]').onclick = () => zone(id, "");
     f.onsubmit = async e => {
       e.preventDefault();
-      if (!confirmer("Rendre ce jugement ? Il sera public.")) return;
+      if (!await confirmer("Rendre ce jugement ? Il sera public.")) return;
       const fd = new FormData(f);
       try { await updateDoc(doc(db, "affaires", id), { statut: "jugee", verdict: fd.get("verdict"), sanction: String(fd.get("sanction")).trim() || null, jugement: String(fd.get("jugement")).trim(), juge: uid, jugeP: nomOfficiel(moi), jugeLe: serverTimestamp() }); }
       catch (err) { erreur("#msg-affaires", err); }
