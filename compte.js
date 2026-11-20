@@ -1,18 +1,20 @@
-import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel } from "./parcum.js?v=13";
+import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel, syncCarte } from "./parcum.js?v=15";
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let moi = null, uid = null, stopDemande = null, photo = null;
+let moi = null, uid = null, stopDemande = null, photo = null, carteActuelle = undefined;
 
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "connexion.html" + location.search;
   uid = user.uid;
-  onSnapshot(doc(db, "photos", uid), s => { photo = s.exists() ? s.data().img : null; if (moi) $("#carte").innerHTML = carteHTML(moi, photo); $("#suppr-photo").hidden = !photo; }, () => {});
+  onSnapshot(doc(db, "cartes", uid), s => { carteActuelle = s.exists() ? s.data() : null; if (moi) syncCarte(uid, moi, carteActuelle); }, () => {});
+  onSnapshot(doc(db, "photos", uid), s => { photo = s.exists() ? s.data().img : null; if (moi) $("#carte").innerHTML = carteHTML(moi, photo, uid); $("#suppr-photo").hidden = !photo; }, () => {});
   onSnapshot(doc(db, "users", uid), snap => {
     if (!snap.exists()) return completerProfil(user);
     const ancien = moi?.role;
     moi = snap.data();
-    $("#carte").innerHTML = carteHTML(moi, photo);
+    $("#carte").innerHTML = carteHTML(moi, photo, uid);
+    if (carteActuelle !== undefined) syncCarte(uid, moi, carteActuelle);
     $("#pseudo").value = moi.pseudo;
     if (!$("#d-nom").value && (moi.prenom || moi.nom)) $("#d-nom").value = nomOfficiel(moi);
     if (ancien !== moi.role) afficherRole();

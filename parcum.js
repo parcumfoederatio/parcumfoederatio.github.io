@@ -1,8 +1,9 @@
 // Module commun : connexion à Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { firebaseConfig } from "./firebase-config.js?v=13";
+import { getFirestore, connectFirestoreEmulator, doc as _doc, setDoc as _setDoc, serverTimestamp as _ts } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import qrcode from "./qrcode.mjs";
+import { firebaseConfig } from "./firebase-config.js?v=15";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -66,7 +67,23 @@ export function confirmer(texte) {
 }
 
 // Carte de citoyen numérique
-export function carteHTML(u, photo) {
+// ---------- Carte vérifiable (QR code) ----------
+// Copie publique et minimale du profil, que n'importe qui peut lire en scannant le QR
+export const projectionCarte = u => ({
+  prenom: u.prenom ?? null, nom: u.nom ?? null, pseudo: u.pseudo ?? null, citoyenNo: u.citoyenNo ?? null,
+  role: u.role, couleur: u.couleur ?? null, senat: u.senat ?? null, juge: u.juge === true, chef: u.chef === true
+});
+export const memeCarte = (a, b) => !!a && Object.keys(b).every(k => (a[k] ?? null) === (b[k] ?? null));
+export function syncCarte(id, u, actuelle) {
+  if (!u || !id) return;
+  const p = projectionCarte(u);
+  if (memeCarte(actuelle, p)) return;
+  return _setDoc(_doc(db, "cartes", id), { ...p, maj: _ts() }).catch(() => {});
+}
+export const lienVerif = id => { const url = new URL("verifier.html", location.href); url.search = "?c=" + encodeURIComponent(id); url.hash = ""; return url.href; };
+export function qrSVG(texte) { const q = qrcode(0, "M"); q.addData(texte); q.make(); return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }); }
+
+export function carteHTML(u, photo, id) {
   const coul = COULEURS[u.couleur] || "#c9c4b8";
   let statut = u.role === "consul" && u.chef === true ? "Consul fondateur" : (ROLES[u.role] || u.role);
   if (u.juge && !u.chef) statut += " · Juge suppléant";
@@ -83,6 +100,6 @@ export function carteHTML(u, photo) {
       <div><span>Couleur</span><b>${u.couleur ? `<i class="pastille" style="background:${coul}"></i>${esc(u.couleur)}` : "—"}</b></div>
       <div><span>Membre depuis</span><b>${dateFr(u.creeLe)}</b></div>
     </div>
-    <div class="ci-devise">« Que le Parc nous accepte et nous guide »</div>
+    <div class="ci-bas"><div class="ci-devise">« Que le Parc nous accepte et nous guide »</div>${id ? `<a class="ci-qr" href="${lienVerif(id)}" target="_blank" rel="noopener" title="Scanner pour vérifier la carte">${qrSVG(lienVerif(id))}</a>` : ""}</div>
   </div>`;
 }

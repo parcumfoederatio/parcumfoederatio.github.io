@@ -1,4 +1,4 @@
-import { auth, db, $, confirmer, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES } from "./parcum.js?v=13";
+import { auth, db, $, confirmer, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES, syncCarte } from "./parcum.js?v=15";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, updateDoc, addDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -13,11 +13,16 @@ onAuthStateChanged(auth, async user => {
   moi = s.data();
   if (!moi || moi.role !== "consul") { $("#refus").hidden = false; return; }
   $("#espace").hidden = false;
-  onSnapshot(collection(db, "users"), snap => { users = snap.docs.map(d => ({ id: d.id, ...d.data() })); afficherRegistre(); afficherEconomie(); });
+  onSnapshot(collection(db, "users"), snap => { users = snap.docs.map(d => ({ id: d.id, ...d.data() })); afficherRegistre(); afficherEconomie(); synchroCartes(); });
+  onSnapshot(collection(db, "cartes"), snap => { cartes = Object.fromEntries(snap.docs.map(d => [d.id, d.data()])); cartesPretes = true; synchroCartes(); }, () => {});
   onSnapshot(query(collection(db, "demandes"), where("statut", "==", "en attente")), afficherDemandes);
   onSnapshot(collection(db, "brouillons"), afficherBrouillons);
   onSnapshot(query(collection(db, "transactions"), orderBy("date", "desc"), limit(30)), afficherTx);
 });
+
+// Garde les cartes publiques (QR) à jour quand un Consul change un statut, une couleur, un numéro…
+let cartes = {}, cartesPretes = false;
+function synchroCartes() { if (!cartesPretes || !users.length) return; users.forEach(u => syncCarte(u.id, u, cartes[u.id])); }
 
 document.querySelectorAll(".onglet").forEach(b => b.onclick = () => {
   document.querySelectorAll(".onglet").forEach(x => x.classList.toggle("on", x === b));

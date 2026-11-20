@@ -253,5 +253,24 @@ service cloud.firestore {
         && request.resource.data.statut in ['payee','livree','annulee'];
       allow delete: if estChef();
     }
+
+    // ---------- Cartes vérifiables (QR code) ----------
+    function carteConforme(uid) {
+      let u = get(/databases/$(db)/documents/users/$(uid)).data;
+      let c = request.resource.data;
+      return c.keys().hasOnly(['prenom','nom','pseudo','citoyenNo','role','couleur','senat','juge','chef','maj'])
+        && c.prenom == u.get('prenom', null) && c.nom == u.get('nom', null) && c.pseudo == u.get('pseudo', null)
+        && c.citoyenNo == u.get('citoyenNo', null) && c.role == u.role && c.couleur == u.get('couleur', null)
+        && c.senat == u.get('senat', null)
+        && c.juge == (u.get('juge', false) == true) && c.chef == (u.get('chef', false) == true)
+        && c.maj == request.time;
+    }
+
+    match /cartes/{uid} {
+      allow get: if true;
+      allow list: if estConsul();
+      allow create, update: if connecte() && carteConforme(uid);
+      allow delete: if estChef();
+    }
   }
 }
