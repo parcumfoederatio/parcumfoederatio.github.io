@@ -98,6 +98,15 @@
   body.theme-bleu{--rouge:#2B4F9E;--rouge-f:#1d3a78}
   body.theme-vert{--rouge:#006233;--rouge-f:#004a26}
   body.theme-orange{--rouge:#FF883E;--rouge-f:#e8701f}
+  /* Jaune : le texte passe en foncé pour rester lisible */
+  body.theme-jaune{--rouge:#FBD700;--rouge-f:#e0c000}
+  body.theme-jaune header.barre{color:#1b1b1f;border-bottom-color:#C8090A}
+  body.theme-jaune .barre nav a,body.theme-jaune .barre .nom,body.theme-jaune .menu-btn{color:#1b1b1f}
+  body.theme-jaune .menu-btn{border-color:rgba(0,0,0,.4)}
+  body.theme-jaune .barre nav{border-bottom-color:#C8090A}
+  body.theme-jaune .nav-compte{background:rgba(0,0,0,.08)}
+  body.theme-jaune a,body.theme-jaune .kicker,body.theme-jaune .tuile .fleche,body.theme-jaune .lien,body.theme-jaune .solde{color:#7a6200}
+  body.theme-jaune .btn,body.theme-jaune .doc-btn,body.theme-jaune .onglet.on,body.theme-jaune .etape::before{color:#1b1b1f}
   .etoile-mmt{text-align:center;margin:44px 0 6px}
   .etoile-mmt img{width:min(70%,300px);height:auto}
   .bienvenue{margin:30px 0 6px;padding:34px 24px;text-align:center;border-radius:14px;background:var(--rouge);color:#fff;border-bottom:6px solid var(--or)}
