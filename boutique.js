@@ -2,7 +2,7 @@ import { auth, db, $, confirmer, esc, message, erreurFr, dateFr, nomOfficiel, MA
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, query, where, addDoc, updateDoc, deleteDoc, runTransaction, writeBatch, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let uid = null, moi = null, produits = [], commandes = [], vue = "payee", stops = [];
+let uid = null, moi = null, produits = [], commandes = [], vue = "payee", stops = [], imageForm = null;
 const erreur = (el, e) => message($(el), erreurFr(e), "erreur");
 const consul = () => moi?.role === "consul";
 const citoyen = () => moi?.role === "citoyen";
@@ -47,7 +47,7 @@ function afficherProduits() {
   $("#produits").innerHTML = liste.length ? liste.map(p => {
     const epuise = typeof p.stock === "number" && p.stock <= 0;
     const max = Math.min(10, typeof p.stock === "number" ? p.stock : 10);
-    let h = `<div class="carte o" style="${p.actif ? "" : "opacity:.55"}"><div style="font-size:2rem">${esc(p.icone || "🏛️")}</div>
+    let h = `<div class="carte o" style="${p.actif ? "" : "opacity:.55"}">${p.img ? `<img src="${p.img}" alt="${esc(p.nom)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;margin-bottom:10px;background:#f3efe6">` : `<div style="font-size:2rem">${esc(p.icone || "🏛️")}</div>`}
       <h3>${esc(p.nom)}</h3>${p.description ? `<p>${esc(p.description)}</p>` : ""}
       <p class="solde" style="font-size:1.6rem;margin-top:8px">${p.prix} §</p>
       <p class="mini">${!p.actif ? "Pas en vente" : epuise ? "Épuisé" : typeof p.stock === "number" ? `${p.stock} en stock` : "Stock illimité"}</p>`;
@@ -92,18 +92,53 @@ async function acheter(id) {
 function editer(id) {
   const p = produits.find(x => x.id === id); if (!p) return;
   $("#p-id").value = id; $("#p-nom").value = p.nom; $("#p-icone").value = p.icone || ""; $("#p-desc").value = p.description || "";
+  imageForm = p.img || null; apercu();
   $("#p-prix").value = p.prix; $("#p-stock").value = typeof p.stock === "number" ? p.stock : ""; $("#p-actif").checked = !!p.actif;
   $("#p-btn").textContent = "Enregistrer"; $("#p-annuler").hidden = false;
   $("#f-produit").scrollIntoView({ behavior: "smooth", block: "center" });
 }
-function viderForm() { $("#f-produit").reset(); $("#p-id").value = ""; $("#p-btn").textContent = "Ajouter le produit"; $("#p-annuler").hidden = true; }
+function apercu() {
+  $("#p-apercu").hidden = !imageForm;
+  $("#p-apercu").style.display = imageForm ? "flex" : "none";
+  if (imageForm) $("#p-apercu-img").src = imageForm;
+}
+// Redimensionne la photo (max 640 px) et la compresse en JPEG pour qu'elle tienne dans Firestore
+function preparerImage(fichier) {
+  return new Promise((ok, ko) => {
+    const lecteur = new FileReader();
+    lecteur.onerror = () => ko(new Error("Impossible de lire cette image."));
+    lecteur.onload = () => {
+      const img = new Image();
+      img.onerror = () => ko(new Error("Ce fichier n'est pas une image valide."));
+      img.onload = () => {
+        const max = 640, r = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+        const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        let q = 0.82, url = c.toDataURL("image/jpeg", q);
+        while (url.length > 280000 && q > 0.4) { q -= 0.1; url = c.toDataURL("image/jpeg", q); }
+        url.length > 280000 ? ko(new Error("Image trop lourde, même compressée. Essaie une autre photo.")) : ok(url);
+      };
+      img.src = lecteur.result;
+    };
+    lecteur.readAsDataURL(fichier);
+  });
+}
+$("#p-image").onchange = async () => {
+  const f = $("#p-image").files[0]; if (!f) return;
+  try { imageForm = await preparerImage(f); apercu(); } catch (e) { erreur("#msg-produit", e); $("#p-image").value = ""; }
+};
+$("#p-image-suppr").onclick = () => { imageForm = null; $("#p-image").value = ""; apercu(); };
+
+function viderForm() { imageForm = null; apercu(); $("#f-produit").reset(); $("#p-id").value = ""; $("#p-btn").textContent = "Ajouter le produit"; $("#p-annuler").hidden = true; }
 $("#p-annuler").onclick = viderForm;
 $("#f-produit").onsubmit = async e => {
   e.preventDefault();
   const prix = parseInt($("#p-prix").value, 10), st = $("#p-stock").value.trim();
   if (!(prix > 0)) return message($("#msg-produit"), "Le prix doit être un entier plus grand que 0.", "erreur");
   if (st !== "" && !(parseInt(st, 10) >= 0)) return message($("#msg-produit"), "Le stock doit être un entier (ou vide pour illimité).", "erreur");
-  const champs = { nom: $("#p-nom").value.trim(), icone: $("#p-icone").value.trim(), description: $("#p-desc").value.trim(), prix, stock: st === "" ? null : parseInt(st, 10), actif: $("#p-actif").checked };
+  const champs = { nom: $("#p-nom").value.trim(), icone: $("#p-icone").value.trim(), description: $("#p-desc").value.trim(), prix, stock: st === "" ? null : parseInt(st, 10), actif: $("#p-actif").checked, img: imageForm };
   try {
     if ($("#p-id").value) { await updateDoc(doc(db, "produits", $("#p-id").value), champs); message($("#msg-produit"), "Produit modifié.", "ok"); }
     else { await addDoc(collection(db, "produits"), { ...champs, creeLe: serverTimestamp(), derniereCommande: null }); message($("#msg-produit"), "Produit ajouté à la boutique.", "ok"); }

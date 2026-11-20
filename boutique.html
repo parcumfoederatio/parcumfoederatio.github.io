@@ -43,7 +43,9 @@
     <form id="f-produit" class="formu sans" style="max-width:none;margin-top:12px">
       <input type="hidden" id="p-id">
       <label>Nom<input id="p-nom" maxlength="60" required placeholder="Ex. : Drapeau officiel"></label>
-      <label>Icône (un emoji, optionnel)<input id="p-icone" maxlength="8" placeholder="🚩"></label>
+      <label>Photo de l'article (optionnel)<input id="p-image" type="file" accept="image/*"></label>
+      <div id="p-apercu" class="sans" hidden style="display:flex;align-items:center;gap:12px"><img id="p-apercu-img" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:8px;border:1px solid #d6d0c2"><button class="btn danger" type="button" id="p-image-suppr">Enlever la photo</button></div>
+      <label>Icône (un emoji, si pas de photo)<input id="p-icone" maxlength="8" placeholder="🚩"></label>
       <label>Description<textarea id="p-desc" maxlength="500" style="min-height:70px"></textarea></label>
       <label>Prix (§)<input id="p-prix" type="number" min="1" step="1" required></label>
       <label>Stock (vide = illimité)<input id="p-stock" type="number" min="0" step="1"></label>
@@ -59,7 +61,7 @@
   </div>
 </div>
 </section></main>
-<script type="module" src="boutique.js?v=13"></script>
+<script type="module" src="boutique.js?v=14"></script>
 <footer class="sans">
   <div class="in">
     <img src="embleme.png" alt="">

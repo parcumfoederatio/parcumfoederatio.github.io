@@ -203,13 +203,15 @@ service cloud.firestore {
     }
 
     // ---------- Boutique d'État ----------
+    function imageValide(img) { return img == null || (img is string && img.size() < 300000 && img.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')); }
     function produitDe(pid) { return get(/databases/$(db)/documents/produits/$(pid)).data; }
     function commandeApres(cid) { return getAfter(/databases/$(db)/documents/commandes/$(cid)).data; }
 
     match /produits/{id} {
       allow read: if true;
       allow create: if estConsul()
-        && request.resource.data.keys().hasOnly(['nom','description','icone','prix','stock','actif','creeLe','derniereCommande'])
+        && request.resource.data.keys().hasOnly(['nom','description','icone','img','prix','stock','actif','creeLe','derniereCommande'])
+        && imageValide(request.resource.data.get('img', null))
         && texte(request.resource.data.nom, 1, 60)
         && texte(request.resource.data.description, 0, 500)
         && texte(request.resource.data.icone, 0, 8)
@@ -218,6 +220,7 @@ service cloud.firestore {
         && request.resource.data.actif is bool
         && request.resource.data.creeLe == request.time;
       allow update: if estConsul() && !change(['creeLe'])
+        && imageValide(request.resource.data.get('img', null))
         && request.resource.data.prix is int && request.resource.data.prix > 0
         && (request.resource.data.stock == null || (request.resource.data.stock is int && request.resource.data.stock >= 0));
       // Un citoyen qui achète fait baisser le stock du nombre acheté
