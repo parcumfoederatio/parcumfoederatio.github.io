@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel, syncCarte } from "./parcum.js?v=16";
+import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel, syncCarte } from "./parcum.js?v=17";
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 

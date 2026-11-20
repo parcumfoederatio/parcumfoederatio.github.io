@@ -197,3 +197,7 @@
   .verif-etat{font-size:3.4rem;line-height:1}
   .verif h2{margin:10px 0 6px}
   .verif .carte-id{text-align:left;margin:22px auto 0}
+  .mmt-entree h3{margin-top:8px}
+  .mmt-tete{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .puce{display:inline-block;font-size:.78rem;padding:3px 9px;border-radius:99px;margin:0 6px 4px 0;background:#eee9de;color:#9a9385}
+  .puce.on{background:var(--rouge);color:#fff;font-weight:700}

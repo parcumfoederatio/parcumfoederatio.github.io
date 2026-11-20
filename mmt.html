@@ -46,9 +46,41 @@
   </div>
 
   <div class="etoile-mmt"><img src="etoile-mmt.svg" alt="Étoile du MMT"></div>
+<h2 id="journal" style="margin-top:46px;scroll-margin-top:110px">Le Journal du MMT</h2>
+<p>Tous les MMT depuis le premier, saison par saison : où ils ont eu lieu, qui était là et ce qui s'est passé.</p>
+<div id="j-prive" class="panneau-compte sans" hidden></div>
+<div id="j-zone" hidden>
+  <div id="j-stats" class="grille sans" style="margin-bottom:6px"></div>
+  <div class="onglets sans" id="j-filtres"></div>
+  <div id="j-msg" class="sans"></div>
+  <div id="j-gestion" class="panneau-compte" hidden>
+    <h3 id="j-form-titre">Ajouter un MMT</h3>
+    <form id="j-form" class="formu sans" style="max-width:none;margin-top:10px">
+      <input type="hidden" id="j-id">
+      <label>Saison<select id="j-saison"></select></label>
+      <label>Nom<input id="j-titre" maxlength="60" required placeholder="MMT IX, MMT Halloween…"></label>
+      <label>Date<input id="j-date" type="date" required></label>
+      <label>Endroit<input id="j-endroit" maxlength="160"></label>
+      <label>Consuls présents</label><div id="j-membres" class="sans" style="display:flex;flex-wrap:wrap;gap:12px"></div>
+      <label>Invités spéciaux (séparés par des virgules)<input id="j-invites" maxlength="300"></label>
+      <label>N° réel<input id="j-reel" type="number" min="0" step="1"></label>
+      <label>Note sur 5 (optionnel)<input id="j-rating" type="number" min="0" max="5" step="0.001"></label>
+      <label>Ce qui s'est passé<textarea id="j-note" maxlength="2000"></textarea></label>
+      <div class="actions"><button class="btn" type="submit" id="j-btn">Ajouter au journal</button><button class="btn sec" type="button" id="j-annuler" hidden>Annuler la modification</button></div>
+    </form>
+    <div id="j-msg-form" class="sans"></div>
+    <div id="j-import" hidden style="margin-top:18px;border-top:1px solid var(--ligne);padding-top:14px">
+      <h3>Importer le registre (accès fondateur)</h3>
+      <p class="mini sans">Choisis le fichier d'import du registre Notion. Les MMT déjà dans le journal ne sont pas dupliqués.</p>
+      <input type="file" id="j-fichier" accept=".json,application/json" class="sans">
+    </div>
+  </div>
+  <div id="j-liste"></div>
+</div>
 <div class="suite sans"><a href="index.html">← Accueil</a><a href="institutions.html">Institutions →</a></div>
 </section>
 </main>
+<script type="module" src="journal.js?v=17"></script>
 <footer class="sans">
   <div class="in">
     <img src="embleme.png" alt="">

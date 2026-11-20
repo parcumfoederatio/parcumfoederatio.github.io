@@ -272,5 +272,28 @@ service cloud.firestore {
       allow create, update: if connecte() && carteConforme(uid);
       allow delete: if estChef();
     }
+
+    // ---------- Journal du MMT ----------
+    function membre() { return existe() && moi().role in ['citoyen','resident','consul']; }
+    function mmtValide() {
+      let m = request.resource.data;
+      return m.keys().hasOnly(['saison','titre','date','endroit','membres','invites','reel','rating','note','creeLe'])
+        && m.saison in ['Saison 1','Saison 2','Saison 3','Saison 4','Hors Série']
+        && texte(m.titre, 1, 60)
+        && m.date is string && m.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && texte(m.endroit, 0, 160)
+        && m.membres is list && m.membres.size() <= 5
+        && m.invites is list && m.invites.size() <= 30
+        && (m.reel == null || m.reel is int)
+        && (m.rating == null || m.rating is number)
+        && texte(m.note, 0, 2000);
+    }
+
+    match /mmt/{id} {
+      allow read: if membre();
+      allow create: if estConsul() && mmtValide() && request.resource.data.creeLe == request.time;
+      allow update: if estConsul() && mmtValide() && !change(['creeLe']);
+      allow delete: if estConsul();
+    }
   }
 }
