@@ -107,6 +107,8 @@
   body.clair .barre nav{border-bottom-color:#C8090A}
   body.clair .nav-compte{background:rgba(0,0,0,.08)}
   body.clair a,body.clair .kicker,body.clair .tuile .fleche,body.clair .lien,body.clair .solde{color:var(--texte-accent)}
+  body.theme-rose header.barre,body.theme-rose .barre nav{border-bottom-color:var(--or)}
+  body.theme-rose .carte.r{border-top-color:#C8090A}
   body.clair .btn,body.clair .doc-btn,body.clair .onglet.on,body.clair .etape::before{color:#1b1b1f}
   .etoile-mmt{text-align:center;margin:44px 0 6px}
   .etoile-mmt img{width:min(70%,300px);height:auto}
