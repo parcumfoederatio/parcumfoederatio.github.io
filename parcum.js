@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, connectFirestoreEmulator, doc as _doc, setDoc as _setDoc, serverTimestamp as _ts } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import qrcode from "./qrcode.mjs";
-import { firebaseConfig } from "./firebase-config.js?v=15";
+import { firebaseConfig } from "./firebase-config.js?v=16";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -18,7 +18,7 @@ if (["localhost", "127.0.0.1"].includes(location.hostname) && new URLSearchParam
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 export const $ = s => document.querySelector(s);
 export const COULEURS = { orange: "#F28C28", rouge: "#C8090A", mauve: "#7B3FA0", bleu: "#2B4F9E", vert: "#1E6B3A", noir: "#1b1b1f", pourpre: "#6E1440" };
-export const ROLES = { visiteur: "Visiteur", citoyen: "Citoyen", consul: "Consul du MMT" };
+export const ROLES = { visiteur: "Visiteur", resident: "Résident permanent", citoyen: "Citoyen", consul: "Consul du MMT" };
 export const numero = n => n == null ? "—" : "PF-" + String(n).padStart(3, "0");
 export const dateFr = t => t?.toDate ? t.toDate().toLocaleDateString("fr-CA", { day: "numeric", month: "long", year: "numeric" }) : "—";
 export const MAX_SPARCS = 121;
@@ -89,7 +89,7 @@ export function carteHTML(u, photo, id) {
   if (u.juge && !u.chef) statut += " · Juge suppléant";
   if (u.senat) statut += TERRITOIRES.includes(u.senat) ? ` · Observateur de ${u.senat}` : ` · Sénateur de ${u.senat}`;
   return `<div class="carte-id" style="--cc:${coul}">
-    <div class="ci-haut"><img src="embleme.png" alt=""><div><div class="ci-pays">PARCUM FŒDERATIO</div><div class="ci-type">${u.role === "visiteur" ? "Compte visiteur" : "Carte de citoyen"}</div></div></div>
+    <div class="ci-haut"><img src="embleme.png" alt=""><div><div class="ci-pays">PARCUM FŒDERATIO</div><div class="ci-type">${u.role === "visiteur" ? "Compte visiteur" : u.role === "resident" ? "Carte de résident permanent" : "Carte de citoyen"}</div></div></div>
     <div class="ci-milieu">
       <div class="ci-photo">${photo ? `<img src="${photo}" alt="Photo de ${esc(nomOfficiel(u))}">` : `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="4.2" fill="currentColor"/><path d="M3.5 21c.9-4.4 4.3-6.8 8.5-6.8s7.6 2.4 8.5 6.8" fill="currentColor"/></svg>`}</div>
       <div class="ci-nom">${esc(nomOfficiel(u))}${u.prenom || u.nom ? `<small class="ci-pseudo">« ${esc(u.pseudo)} »</small>` : ""}</div>

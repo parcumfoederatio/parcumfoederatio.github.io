@@ -1,4 +1,4 @@
-import { db, $, esc, numero, COULEURS, ROLES, TERRITOIRES, dateFr } from "./parcum.js?v=15";
+import { db, $, esc, numero, COULEURS, ROLES, TERRITOIRES, dateFr } from "./parcum.js?v=16";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const id = new URLSearchParams(location.search).get("c");
@@ -28,7 +28,7 @@ async function verifier() {
         <div><span>Mise à jour</span><b>${dateFr(c.maj)}</b></div>
       </div></div>`;
     if (["citoyen", "consul"].includes(c.role)) afficher("✅", "Citoyen valide", `<b>${esc(nom)}</b> est ${c.role === "consul" ? "Consul et citoyen" : "citoyen"} de la Parcum Fœderatio.`, carte);
-    else if (c.role === "resident") afficher("🟡", "Résident, pas citoyen", `<b>${esc(nom)}</b> est résident de la Fédération, mais n'est pas citoyen.`, carte);
+    else if (c.role === "resident") afficher("🟡", "Résident permanent", `<b>${esc(nom)}</b> est résident permanent de la Parcum Fœderatio. Il n'est pas citoyen.`, carte);
     else afficher("🟠", "Pas citoyen", `<b>${esc(nom)}</b> a un compte visiteur : ce n'est pas une carte de citoyen.`, carte);
   } catch (e) { afficher("⚠️", "Vérification impossible", "Le site n'a pas pu joindre le registre. Réessaie dans un instant."); }
 }

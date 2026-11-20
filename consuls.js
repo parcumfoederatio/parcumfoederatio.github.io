@@ -1,4 +1,4 @@
-import { auth, db, $, confirmer, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES, syncCarte } from "./parcum.js?v=15";
+import { auth, db, $, confirmer, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES, syncCarte } from "./parcum.js?v=16";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, updateDoc, addDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 

@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel, syncCarte } from "./parcum.js?v=15";
+import { auth, db, $, esc, message, erreurFr, carteHTML, numero, dateFr, nomOfficiel, syncCarte } from "./parcum.js?v=16";
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, setDoc, getDoc, updateDoc, deleteDoc, collection, query, where, getDocs, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -47,7 +47,7 @@ function completerProfil(user) {
 function afficherRole() {
   ["#z-visiteur", "#z-citoyen", "#z-consul"].forEach(z => $(z).hidden = true);
   if (stopDemande) { stopDemande(); stopDemande = null; }
-  if (moi.role === "visiteur") { $("#z-visiteur").hidden = false; suivreDemande(); }
+  if (["visiteur", "resident"].includes(moi.role)) { $("#z-visiteur").hidden = false; suivreDemande(); }
   if (moi.role === "citoyen") { $("#z-citoyen").hidden = false; $("#solde").textContent = moi.sparcs; chargerCitoyens(); chargerHistorique(); }
   if (moi.role === "consul") { $("#z-consul").hidden = false; }
 }
