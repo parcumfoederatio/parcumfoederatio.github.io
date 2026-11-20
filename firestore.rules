@@ -203,7 +203,7 @@ service cloud.firestore {
     }
 
     // ---------- Boutique d'État ----------
-    function imageValide(img) { return img == null || (img is string && img.size() < 300000 && img.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')); }
+    function imageValide(v) { return v == null || (v is string && v.size() < 300000 && v.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')); }
     function produitDe(pid) { return get(/databases/$(db)/documents/produits/$(pid)).data; }
     function commandeApres(cid) { return getAfter(/databases/$(db)/documents/commandes/$(cid)).data; }
 
