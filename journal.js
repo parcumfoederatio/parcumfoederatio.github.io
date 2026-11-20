@@ -1,8 +1,8 @@
-import { auth, db, $, esc, message, erreurFr, confirmer } from "./parcum.js?v=17";
+import { auth, db, $, esc, message, erreurFr, confirmer } from "./parcum.js?v=18";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const SAISONS = ["Saison 1", "Saison 2", "Saison 3", "Saison 4", "Hors Série"];
+const SAISONS = ["Saison 1", "Saison 3", "Saison 2", "Saison 4", "Hors Série"]; // dans l'ordre où elles se sont passées
 const CONSULS = ["Aylane", "Joe", "Maxime", "William", "Youri"];
 let moi = null, mmt = [], vue = "toutes", stopJ = null, stopU = null;
 const consul = () => moi?.role === "consul";
@@ -98,12 +98,12 @@ function afficher() {
     .map(([v, t, n]) => `<button class="onglet ${vue === v ? "on" : ""}" data-v="${v}">${t}<span class="nb">${n || ""}</span></button>`).join("");
   document.querySelectorAll("#j-filtres .onglet").forEach(b => b.onclick = () => { vue = b.dataset.v; afficher(); });
 
-  const liste = mmt.filter(m => vue === "toutes" || m.saison === vue).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const liste = mmt.filter(m => vue === "toutes" || m.saison === vue).sort((a, b) => (a.date || "").localeCompare(b.date || "")); // du plus ancien au plus récent
   $("#j-liste").innerHTML = liste.length ? liste.map(m => `<div class="bloc mmt-entree">
       <div class="mmt-tete"><span class="tag sans">${esc(m.saison)}${m.reel != null ? ` · n° ${m.reel}` : ""}</span>${m.rating != null ? `<span class="sans">${etoiles(m.rating)}</span>` : ""}</div>
       <h3>${esc(m.titre)}${m.endroit ? ` <small>· ${esc(m.endroit)}</small>` : ""}</h3>
       <p class="sans mini" style="margin-top:2px">${dateLongue(m.date)}</p>
-      ${(m.membres || []).length ? `<p class="sans" style="margin-top:8px">${CONSULS.map(c => `<span class="puce ${(m.membres || []).includes(c) ? "on" : ""}">${c}</span>`).join("")}</p>` : ""}
+      ${(m.membres || []).length ? `<p class="sans" style="margin-top:8px">${CONSULS.map(c => `<span class="puce ${(m.membres || []).includes(c) ? "on" : ""}">${c}</span>`).join(" ")}</p>` : ""}
       ${(m.invites || []).length ? `<p class="sans mini" style="margin-top:6px">⭐ Invités spéciaux : ${m.invites.map(esc).join(", ")}</p>` : ""}
       ${m.note ? `<p style="margin-top:8px">${esc(m.note)}</p>` : ""}
       ${consul() ? `<div class="actions sans"><button class="btn sec" data-editer="${m.id}">Modifier</button><button class="btn danger" data-suppr="${m.id}">Supprimer</button></div>` : ""}
