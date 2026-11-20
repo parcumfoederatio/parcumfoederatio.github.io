@@ -98,6 +98,7 @@
   body.theme-bleu{--rouge:#2B4F9E;--rouge-f:#1d3a78}
   body.theme-vert{--rouge:#006233;--rouge-f:#004a26}
   body.theme-orange{--rouge:#FF883E;--rouge-f:#e8701f}
+  body.theme-prune{--rouge:#7E4D73;--rouge-f:#663c5d}
   /* Thèmes clairs (jaune, rose) : le texte passe en foncé pour rester lisible */
   body.theme-jaune{--rouge:#FFBF00;--rouge-f:#e6a800;--texte-accent:#7a5600}
   body.theme-rose{--rouge:#EF889A;--rouge-f:#e06a80;--texte-accent:#a3334a}
