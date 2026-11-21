@@ -107,6 +107,7 @@ service cloud.firestore {
         resource.data.auteur == request.auth.uid
         || (seulement(['votes']) && request.resource.data.votes.diff(resource.data.votes).affectedKeys().hasOnly([request.auth.uid]))
       );
+      allow update: if estChef();
       allow delete: if estConsul() && resource.data.auteur == request.auth.uid;
     }
 
@@ -294,6 +295,20 @@ service cloud.firestore {
       allow create: if estConsul() && mmtValide() && request.resource.data.creeLe == request.time;
       allow update: if estConsul() && mmtValide() && !change(['creeLe']);
       allow delete: if estConsul();
+    }
+
+    // ---------- Journal officiel (publié par le Consul fondateur) ----------
+    match /journal/{id} {
+      allow read: if true;
+      allow create: if estChef()
+        && request.resource.data.keys().hasOnly(['type','numero','titre','contenu','source','sourceId','publieLe'])
+        && request.resource.data.type in ['decret','loi']
+        && texte(request.resource.data.numero, 1, 20)
+        && texte(request.resource.data.titre, 1, 160)
+        && texte(request.resource.data.contenu, 1, 20000)
+        && request.resource.data.publieLe == request.time;
+      allow update: if estChef() && !change(['publieLe']);
+      allow delete: if estChef();
     }
   }
 }

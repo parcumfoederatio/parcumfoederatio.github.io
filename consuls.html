@@ -36,11 +36,16 @@
     <button class="onglet" data-v="p-brouillons">Décrets et votes</button>
     <button class="onglet" data-v="p-registre">Registre</button>
     <button class="onglet" data-v="p-economie">Économie</button>
+    <button class="onglet" data-v="p-publier" id="t-publier" hidden>À publier<span class="nb" id="nb-publier"></span></button>
   </div>
   <div id="p-demandes" class="panneau"><h2>Demandes de citoyenneté</h2><p class="mini">La citoyenneté est accordée quand les cinq Consuls ont signé. Chaque Consul peut mettre son veto (Constitution, art. 1).</p><div id="msg-demandes" class="sans"></div><div id="demandes" class="sans" style="margin-top:14px"></div></div>
   <div id="p-brouillons" class="panneau" hidden><h2>Brouillons de décrets</h2>
     <form id="f-brouillon" class="formu sans" style="max-width:none;margin:12px 0 22px"><label>Titre<input id="b-titre" maxlength="120" required placeholder="Décret n°0XX — …"></label><label>Contenu<textarea id="b-contenu" required></textarea></label><button class="btn" type="submit">Proposer au Conseil</button></form>
     <div id="msg-brouillons" class="sans"></div><div id="brouillons"></div></div>
+  <div id="p-publier" class="panneau" hidden><h2>Journal officiel : à publier</h2>
+    <p class="mini">Accès fondateur. Un décret adopté par le Conseil, ou une loi adoptée par le Sénat puis le Conseil, n'apparaît dans Documents qu'une fois que tu l'as validé ici. Tu peux corriger le numéro, le titre et le texte avant de publier.</p>
+    <div id="msg-publier" class="sans"></div><div id="a-publier"></div>
+    <h3 style="margin-top:26px">Déjà publiés</h3><div id="publies"></div></div>
   <div id="p-registre" class="panneau" hidden><h2>Registre des comptes</h2><p class="mini">Change la couleur d'un compte (Décret n°004 : orange, rouge, mauve, bleu, vert, noir, pourpre). Seul le Consul fondateur peut changer les noms, les statuts, les numéros de citoyenneté, et nommer les sénateurs et les juges.</p><div id="msg-registre" class="sans"></div>
     <div class="defile"><table class="tableau sans"><thead><tr><th>Compte</th><th>Statut</th><th>Couleur</th><th>Sparcs</th><th>Juge</th><th>Sénat</th></tr></thead><tbody id="registre"></tbody></table></div></div>
   <div id="p-economie" class="panneau" hidden><h2>Économie</h2>
@@ -51,6 +56,7 @@
 </div>
 </section></main>
 <script type="module" src="consuls.js?v=19"></script>
+<script type="module" src="publier.js?v=19"></script>
 <footer class="sans">
   <div class="in">
     <img src="embleme.png" alt="">
