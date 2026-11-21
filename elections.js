@@ -27,7 +27,7 @@ onAuthStateChanged(auth, user => {
 });
 
 $("#e-province").innerHTML = PROVINCES.map(p => `<option>${esc(p)}</option>`).join("");
-$("#f-election").onsubmit = async e => {
+$("#f-lancer").onsubmit = async e => {
   e.preventDefault();
   const type = $("#e-type").value, province = $("#e-province").value;
   if (elections.some(x => x.province === province && ["candidatures", "vote", "fermee"].includes(x.statut))) return message($("#msg-ouvrir"), `Il y a déjà un vote en cours pour ${province}.`, "erreur");
