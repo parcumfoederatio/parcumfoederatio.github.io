@@ -1,4 +1,4 @@
-import { db, $, esc, numero, COULEURS, ROLES, TERRITOIRES, dateFr } from "./parcum.js?v=20";
+import { db, $, esc, numero, COULEURS, ROLES, TERRITOIRES, dateFr } from "./parcum.js?v=21";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const id = new URLSearchParams(location.search).get("c");

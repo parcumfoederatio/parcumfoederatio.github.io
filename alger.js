@@ -1,5 +1,5 @@
 // Marche d'Alger : l'Assemblée vote les décrets (le vote du Gouverneur compte double), le Gouverneur les publie
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, confirmer } from "./parcum.js?v=20";
+import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, confirmer } from "./parcum.js?v=21";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, query, where, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 

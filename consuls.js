@@ -1,4 +1,4 @@
-import { auth, db, $, confirmer, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES, syncCarte } from "./parcum.js?v=20";
+import { auth, db, $, confirmer, esc, message, erreurFr, numero, dateFr, COULEURS, ROLES, MAX_SPARCS, nomOfficiel, PROVINCES, TERRITOIRES, syncCarte } from "./parcum.js?v=21";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, getDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, updateDoc, addDoc, deleteDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -73,6 +73,7 @@ function afficherRegistre() {
     <td><select data-role="${u.id}" ${u.id === uid || !moi.chef ? "disabled" : ""}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${u.role === k ? "selected" : ""}>${v}</option>`).join("")}</select></td>
     <td><select data-couleur="${u.id}"><option value="">—</option>${Object.keys(COULEURS).map(c => `<option ${u.couleur === c ? "selected" : ""}>${c}</option>`).join("")}</select></td>
     <td>${u.role === "citoyen" ? u.sparcs + " §" : "—"}</td>
+    <td><select data-province="${u.id}" ${moi.chef ? "" : "disabled"} title="Province de vote (la plus proche de chez lui)"><option value="">—</option>${PROVINCES.map(p => `<option ${u.province === p ? "selected" : ""}>${esc(p)}</option>`).join("")}</select></td>
     <td><input type="checkbox" data-assemblee="${u.id}" ${u.assemblee ? "checked" : ""} ${moi.chef && !u.chef ? "" : "disabled"} title="Membre de l'Assemblée d'Alger"></td>
     <td><input type="checkbox" data-juge="${u.id}" ${u.juge ? "checked" : ""} ${moi.chef && !u.chef ? "" : "disabled"} title="Juge suppléant de la Cour suprême"></td>
     <td><select data-senat="${u.id}" ${moi.chef ? "" : "disabled"}><option value="">—</option>${[...PROVINCES, ...TERRITOIRES].map(p => `<option ${u.senat === p ? "selected" : ""}>${esc(p)}</option>`).join("")}</select></td></tr>`).join("");
@@ -93,6 +94,10 @@ function afficherRegistre() {
     if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut changer les noms.", "erreur");
     changer(i.dataset[ch], { [ch]: v || null });
   }));
+  document.querySelectorAll("[data-province]").forEach(s => s.onchange = () => {
+    if (!moi.chef) return message($("#msg-registre"), "Seul le Consul fondateur peut rattacher quelqu'un à une province.", "erreur");
+    changer(s.dataset.province, { province: s.value || null });
+  });
   document.querySelectorAll("[data-assemblee]").forEach(c => c.onchange = async () => {
     const u = users.find(x => x.id === c.dataset.assemblee);
     if (!moi.chef) return message($("#msg-registre"), "Seul le Gouverneur peut nommer les membres de l'Assemblée.", "erreur");

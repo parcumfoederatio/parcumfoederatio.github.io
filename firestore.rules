@@ -29,7 +29,7 @@ service cloud.firestore {
         && request.resource.data.creeLe == request.time;
       allow update: if estConsul()
         && !change(['chef'])
-        && (!change(['prenom','nom','senat','juge','assemblee']) || estChef())
+        && (!change(['prenom','nom','senat','juge','assemblee','province']) || estChef())
         && (!change(['role'])
             || estChef()
             || (resource.data.role in ['visiteur','resident'] && request.resource.data.role == 'citoyen'
@@ -333,6 +333,35 @@ service cloud.firestore {
       // Gouverneur (Consul fondateur) : accès complet
       allow update: if estChef();
       allow delete: if estChef() || (connecte() && resource.data.auteur == request.auth.uid && resource.data.statut == 'vote');
+    }
+
+    // ---------- Élections du Sénat ----------
+    function electeur(e) { return existe() && moi().role in ['citoyen','consul'] && moi().get('province', null) == e.province; }
+
+    match /elections/{id} {
+      allow read: if connecte();
+      allow create: if estChef()
+        && request.resource.data.keys().hasOnly(['type','province','statut','candidats','votes','vise','creeLe'])
+        && request.resource.data.type in ['election','revocation']
+        && request.resource.data.province in provinces()
+        && request.resource.data.statut in ['candidatures','vote']
+        && request.resource.data.candidats.size() == 0
+        && request.resource.data.votes.size() == 0
+        && request.resource.data.creeLe == request.time;
+      // Un citoyen de la province se présente ou retire sa candidature
+      allow update: if electeur(resource.data) && resource.data.type == 'election' && resource.data.statut == 'candidatures'
+        && seulement(['candidats'])
+        && request.resource.data.candidats.toSet().difference(resource.data.candidats.toSet())
+             .union(resource.data.candidats.toSet().difference(request.resource.data.candidats.toSet())) == [request.auth.uid].toSet();
+      // Un citoyen de la province vote (il peut changer son vote tant que le vote est ouvert)
+      allow update: if electeur(resource.data) && resource.data.statut == 'vote'
+        && seulement(['votes'])
+        && request.resource.data.votes.diff(resource.data.votes).affectedKeys().hasOnly([request.auth.uid])
+        && ((resource.data.type == 'election' && request.resource.data.votes[request.auth.uid] in resource.data.candidats)
+            || (resource.data.type == 'revocation' && request.resource.data.votes[request.auth.uid] in ['pour','contre']));
+      // Consul fondateur : lance, ferme, valide
+      allow update: if estChef();
+      allow delete: if estChef();
     }
   }
 }

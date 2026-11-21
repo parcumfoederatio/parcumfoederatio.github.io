@@ -6,7 +6,7 @@
 <title>Sénat — Parcum Fœderatio</title>
 <meta name="description" content="Le Sénat de la Parcum Fœderatio : sénateurs, lois et actes provinciaux.">
 <link rel="icon" type="image/png" href="embleme.png">
-<link rel="stylesheet" href="style.css?v=20">
+<link rel="stylesheet" href="style.css?v=21">
 </head>
 <body class="">
 <header class="barre sans">
@@ -63,8 +63,27 @@
     <div id="lois"></div>
   </div>
 </div>
+<div id="z-elections" hidden>
+  <h2 id="elections" style="margin-top:40px;scroll-margin-top:110px">Élections</h2>
+  <p>Les citoyens d'une province élisent leur sénateur. Ils peuvent aussi le révoquer : si la majorité des citoyens de la province vote pour, le siège se libère. Chaque résultat s'applique seulement une fois validé par le Consul fondateur.</p>
+  <p class="sans" id="ma-province"></p>
+  <div id="z-ouvrir" class="panneau-compte" hidden>
+    <h3>Lancer un vote (accès fondateur)</h3>
+    <form id="f-election" class="formu sans" style="max-width:none;margin-top:10px">
+      <label>Type<select id="e-type"><option value="election">Élection d'un sénateur</option><option value="revocation">Révocation du sénateur</option></select></label>
+      <label>Province<select id="e-province"></select></label>
+      <button class="btn" type="submit">Lancer</button>
+    </form>
+    <div id="msg-ouvrir" class="sans"></div>
+  </div>
+  <div class="panneau-compte">
+    <div class="onglets sans" id="e-filtres"><button class="onglet on" data-v="en-cours">En cours<span class="nb" id="nb-elections"></span></button><button class="onglet" data-v="terminees">Terminées</button></div>
+    <div id="msg-elections" class="sans"></div><div id="liste-elections"></div>
+  </div>
+</div>
 </section></main>
-<script type="module" src="senat.js?v=20"></script>
+<script type="module" src="senat.js?v=21"></script>
+<script type="module" src="elections.js?v=21"></script>
 <footer class="sans">
   <div class="in">
     <img src="embleme.png" alt="">
