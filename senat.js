@@ -1,4 +1,4 @@
-import { auth, db, $, confirmer, esc, message, erreurFr, dateFr, nomOfficiel, PROVINCES, TERRITOIRES, estSenateurVotant } from "./parcum.js?v=21";
+import { auth, db, $, suivreUsers, confirmer, esc, message, erreurFr, dateFr, nomOfficiel, PROVINCES, TERRITOIRES, estSenateurVotant } from "./parcum.js?v=23";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -10,12 +10,12 @@ const erreur = (el, e) => message($(el), erreurFr(e), "erreur");
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "connexion.html";
   uid = user.uid;
-  onSnapshot(collection(db, "users"), s => {
-    users = s.docs.map(d => ({ id: d.id, ...d.data() }));
+  suivreUsers(uid, liste => {
+    users = liste;
     moi = users.find(u => u.id === uid) || null;
     $("#chargement").hidden = true; $("#espace").hidden = false;
     tout();
-  }, e => erreur("#chargement", e));
+  });
   onSnapshot(doc(db, "senat", "presidence"), s => { presidence = s.exists() ? s.data() : {}; tout(); }, () => {});
   onSnapshot(collection(db, "lois"), s => { lois = s.docs.map(d => ({ id: d.id, ...d.data() })); afficherLois(); }, e => erreur("#msg-lois", e));
 });

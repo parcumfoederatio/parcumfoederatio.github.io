@@ -4,9 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Espace des Consuls — Parcum Fœderatio</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Parcum Fœderatio">
+<meta property="og:title" content="Espace des Consuls — Parcum Fœderatio">
+<meta property="og:description" content="Espace réservé aux Consuls du MMT.">
+<meta property="og:url" content="https://parcumfoederatio.github.io/consuls.html">
+<meta property="og:image" content="https://parcumfoederatio.github.io/drapeau.png">
+<meta property="og:locale" content="fr_CA">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="Espace réservé aux Consuls du MMT.">
 <link rel="icon" type="image/png" href="embleme.png">
-<link rel="stylesheet" href="style.css?v=21">
+<link rel="stylesheet" href="style.css?v=23">
 </head>
 <body class="">
 <header class="barre sans">
@@ -47,6 +55,7 @@
     <div id="msg-publier" class="sans"></div><div id="a-publier"></div>
     <h3 style="margin-top:26px">Déjà publiés</h3><div id="publies"></div></div>
   <div id="p-registre" class="panneau" hidden><h2>Registre des comptes</h2><p class="mini">Change la couleur d'un compte (Décret n°004 : orange, rouge, mauve, bleu, vert, noir, pourpre). Seul le Consul fondateur peut changer les noms, les statuts, les numéros de citoyenneté, et nommer les sénateurs, les juges et les membres de l'Assemblée d'Alger.</p><div id="msg-registre" class="sans"></div>
+    <div id="z-sauvegarde" class="sans" hidden style="margin:0 0 16px;padding:12px 14px;background:#f6f2e8;border-radius:10px"><b>💾 Sauvegarde (accès fondateur)</b><p class="mini" style="margin:4px 0 8px">Télécharge une copie complète de la base de données (comptes, décrets, lois, affaires, MMT, boutique…). Garde-la en lieu sûr : Firebase gratuit ne fait pas de copies de secours. Les photos de profil ne sont pas incluses.</p><button class="btn sec" id="btn-sauvegarde" type="button">Télécharger une sauvegarde</button> <span id="msg-sauvegarde"></span></div>
     <div class="defile"><table class="tableau sans"><thead><tr><th>Compte</th><th>Statut</th><th>Couleur</th><th>Sparcs</th><th>Province de vote</th><th>Alger</th><th>Juge</th><th>Sénat</th></tr></thead><tbody id="registre"></tbody></table></div></div>
   <div id="p-economie" class="panneau" hidden><h2>Économie</h2>
     <p class="sans mini">Sparcs en circulation</p><div class="solde sans" id="circ">0 / 121 §</div><div class="barre-prog"><span id="circ-barre"></span></div>
@@ -55,8 +64,9 @@
     <div id="msg-eco" class="sans"></div><h3 style="margin-top:22px">Dernières transactions</h3><ul id="tx" class="histo sans"></ul></div>
 </div>
 </section></main>
-<script type="module" src="consuls.js?v=21"></script>
-<script type="module" src="publier.js?v=21"></script>
+<script type="module" src="consuls.js?v=23"></script>
+<script type="module" src="publier.js?v=23"></script>
+<script type="module" src="sauvegarde.js?v=23"></script>
 <footer class="sans">
   <div class="in">
     <img src="embleme.png" alt="">

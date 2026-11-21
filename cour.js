@@ -1,4 +1,4 @@
-import { auth, db, $, confirmer, esc, message, erreurFr, dateFr, nomOfficiel } from "./parcum.js?v=21";
+import { auth, db, $, suivreUsers, confirmer, esc, message, erreurFr, dateFr, nomOfficiel } from "./parcum.js?v=23";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { onSnapshot, collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -16,12 +16,12 @@ const enCours = a => ["deposee", "en cours"].includes(a.statut);
 onAuthStateChanged(auth, user => {
   if (!user) return location.href = "connexion.html";
   uid = user.uid;
-  onSnapshot(collection(db, "users"), s => {
-    users = s.docs.map(d => ({ id: d.id, ...d.data() }));
+  suivreUsers(uid, liste => {
+    users = liste;
     moi = users.find(u => u.id === uid) || null;
     $("#chargement").hidden = true; $("#espace").hidden = false;
     afficherJuges(); afficherDepot(); afficher();
-  }, e => erreur("#chargement", e));
+  });
   onSnapshot(collection(db, "affaires"), s => { affaires = s.docs.map(d => ({ id: d.id, ...d.data() })); afficher(); }, e => erreur("#msg-affaires", e));
 });
 

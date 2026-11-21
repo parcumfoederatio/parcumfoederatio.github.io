@@ -1,5 +1,5 @@
 // Élections et révocations des sénateurs, par province. Le Consul fondateur lance, ferme et valide.
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, confirmer, PROVINCES } from "./parcum.js?v=21";
+import { auth, db, $, suivreUsers, esc, message, erreurFr, dateFr, nomOfficiel, confirmer, PROVINCES } from "./parcum.js?v=23";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -15,8 +15,8 @@ const msg = (t, type) => message($("#msg-elections"), t, type);
 onAuthStateChanged(auth, user => {
   if (!user) return;
   uid = user.uid;
-  onSnapshot(collection(db, "users"), s => {
-    users = s.docs.map(d => ({ id: d.id, ...d.data() }));
+  suivreUsers(uid, liste => {
+    users = liste;
     moi = users.find(u => u.id === uid) || null;
     $("#z-elections").hidden = false;
     $("#z-ouvrir").hidden = !chef();

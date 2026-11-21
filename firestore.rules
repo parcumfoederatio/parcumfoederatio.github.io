@@ -15,7 +15,7 @@ service cloud.firestore {
     function senateur() { return existe() && moi().get('senat', null) != null; }
 
     match /users/{uid} {
-      allow read: if connecte();
+      allow read: if connecte() && (request.auth.uid == uid || membre());
       allow create: if connecte() && request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['pseudo','prenom','nom','role','citoyenNo','couleur','sparcs','creeLe','derniereTx'])
         && texte(request.resource.data.pseudo, 2, 30)
@@ -30,9 +30,10 @@ service cloud.firestore {
       allow update: if estConsul()
         && !change(['chef'])
         && (!change(['prenom','nom','senat','juge','assemblee','province']) || estChef())
-        && (!change(['role'])
+        && (!change(['role','citoyenNo'])
             || estChef()
             || (resource.data.role in ['visiteur','resident'] && request.resource.data.role == 'citoyen'
+                && resource.data.get('citoyenNo', null) == null
                 && getAfter(/databases/$(db)/documents/demandes/$(uid)).data.statut == 'acceptee'
                 && getAfter(/databases/$(db)/documents/demandes/$(uid)).data.signatures.size() >= 5));
       allow update: if connecte() && request.auth.uid == uid && seulement(['pseudo'])
@@ -96,7 +97,18 @@ service cloud.firestore {
         && request.resource.data.nomComplet is string && request.resource.data.nomComplet.size() <= 80
         && request.resource.data.temoin is string && request.resource.data.temoin.size() <= 80
         && request.resource.data.creeLe == request.time;
-      allow update: if estConsul();
+      // Chaque Consul ajoute ou retire SA signature ; la 5e signature fait passer la demande
+      allow update: if estConsul() && resource.data.statut == 'en attente'
+        && seulement(['signatures','statut'])
+        && request.resource.data.signatures.toSet().difference(resource.data.signatures.toSet())
+             .union(resource.data.signatures.toSet().difference(request.resource.data.signatures.toSet())) == [request.auth.uid].toSet()
+        && (request.resource.data.statut == 'en attente'
+            || (request.resource.data.statut == 'acceptee' && request.resource.data.signatures.size() >= 5));
+      // Chaque Consul peut mettre SON veto tant que la demande est en attente
+      allow update: if estConsul() && resource.data.statut == 'en attente'
+        && seulement(['statut','veto'])
+        && request.resource.data.statut == 'refusee' && request.resource.data.veto == request.auth.uid;
+      allow update: if estChef();
       allow delete: if connecte() && ((request.auth.uid == uid && resource.data.statut != 'acceptee') || estConsul());
     }
 

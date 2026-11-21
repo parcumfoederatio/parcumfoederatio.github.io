@@ -1,9 +1,9 @@
 // Module commun : connexion à Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, connectFirestoreEmulator, doc as _doc, setDoc as _setDoc, serverTimestamp as _ts } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, connectFirestoreEmulator, doc as _doc, setDoc as _setDoc, serverTimestamp as _ts, onSnapshot as _onSnap, collection as _coll } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import qrcode from "./qrcode.mjs";
-import { firebaseConfig } from "./firebase-config.js?v=21";
+import { firebaseConfig } from "./firebase-config.js?v=23";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -67,6 +67,18 @@ export function confirmer(texte) {
 }
 
 // Carte de citoyen numérique
+// ---------- Liste des comptes ----------
+// Seuls les citoyens, résidents et Consuls peuvent lire les autres comptes ; un visiteur ne reçoit que le sien
+export function suivreUsers(uid, cb) {
+  let stopListe = null;
+  _onSnap(_doc(db, "users", uid), s => {
+    const moi = s.exists() ? { id: uid, ...s.data() } : null;
+    if (moi && (["citoyen", "resident", "consul"].includes(moi.role) || moi.chef === true)) {
+      if (!stopListe) stopListe = _onSnap(_coll(db, "users"), q => cb(q.docs.map(d => ({ id: d.id, ...d.data() }))), () => cb([moi]));
+    } else { if (stopListe) { stopListe(); stopListe = null; } cb(moi ? [moi] : []); }
+  }, () => cb([]));
+}
+
 // ---------- Carte vérifiable (QR code) ----------
 // Copie publique et minimale du profil, que n'importe qui peut lire en scannant le QR
 export const projectionCarte = u => ({

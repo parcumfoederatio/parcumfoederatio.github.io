@@ -1,5 +1,5 @@
 // Textes publiés en ligne au Journal officiel (après validation du Consul fondateur)
-import { db, $, esc, dateFr } from "./parcum.js?v=21";
+import { db, $, esc, dateFr } from "./parcum.js?v=23";
 import { onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 onSnapshot(collection(db, "journal"), q => {

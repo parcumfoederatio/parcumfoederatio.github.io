@@ -1,5 +1,5 @@
 // Marche d'Alger : l'Assemblée vote les décrets (le vote du Gouverneur compte double), le Gouverneur les publie
-import { auth, db, $, esc, message, erreurFr, dateFr, nomOfficiel, confirmer } from "./parcum.js?v=21";
+import { auth, db, $, suivreUsers, esc, message, erreurFr, dateFr, nomOfficiel, confirmer } from "./parcum.js?v=23";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, query, where, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -18,8 +18,8 @@ onSnapshot(query(collection(db, "marche"), where("statut", "==", "publie")), q =
 onAuthStateChanged(auth, user => {
   if (!user) return;
   uid = user.uid;
-  onSnapshot(collection(db, "users"), s => {
-    users = s.docs.map(d => ({ id: d.id, ...d.data() }));
+  suivreUsers(uid, liste => {
+    users = liste;
     moi = users.find(u => u.id === uid) || null;
     afficherMembres();
     $("#z-vote").hidden = !membre();
