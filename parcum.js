@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, connectAuthEmulator } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, connectFirestoreEmulator, doc as _doc, setDoc as _setDoc, serverTimestamp as _ts } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import qrcode from "./qrcode.mjs";
-import { firebaseConfig } from "./firebase-config.js?v=18";
+import { firebaseConfig } from "./firebase-config.js?v=19";
 
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);

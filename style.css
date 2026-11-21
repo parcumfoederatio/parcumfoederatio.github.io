@@ -201,3 +201,5 @@
   .mmt-tete{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
   .puce{display:inline-block;font-size:.78rem;padding:3px 9px;border-radius:99px;margin:0 6px 4px 0;background:#eee9de;color:#9a9385}
   .puce.on{background:var(--rouge);color:#fff;font-weight:700}
+  .j-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+  @media (max-width:760px){.j-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -1,4 +1,4 @@
-import { auth, db, $, esc, message, erreurFr, confirmer } from "./parcum.js?v=18";
+import { auth, db, $, esc, message, erreurFr, confirmer } from "./parcum.js?v=19";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -84,13 +84,17 @@ function afficher() {
   const reels = mmt.filter(m => m.reel != null && m.saison !== "Hors Série").length;
   const notes = mmt.filter(m => m.rating != null), moy = notes.length ? notes.reduce((s, m) => s + m.rating, 0) / notes.length : null;
   const presences = Object.fromEntries(CONSULS.map(c => [c, mmt.filter(m => (m.membres || []).includes(c)).length]));
-  const assidu = Object.entries(presences).sort((a, b) => b[1] - a[1])[0];
-  const meilleur = [...notes].sort((a, b) => b.rating - a.rating)[0];
+  const parPresence = Object.entries(presences).sort((a, b) => b[1] - a[1]);
+  const assidu = parPresence[0], moinsAssidu = parPresence[parPresence.length - 1];
+  const parNote = [...notes].sort((a, b) => b.rating - a.rating);
+  const meilleur = parNote[0], pire = parNote[parNote.length - 1];
+  const horsSerie = mmt.filter(m => m.saison === "Hors Série").length;
+  const nomMMT = m => m ? `${esc(m.titre)} <small>(${esc(m.saison)})</small> · ${String(m.rating).replace(".", ",")}/5` : "—";
+  const consulTx = c => c && mmt.length ? `${c[0]} (${c[1]})` : "—";
+  // Deux rangées alignées : chaque tuile du bas complète celle du haut
   $("#j-stats").innerHTML = [
-    ["MMT au journal", mmt.length], ["MMT officiels", reels],
-    ["Consul le plus assidu", assidu && assidu[1] ? `${assidu[0]} (${assidu[1]})` : "—"],
-    ["Meilleur MMT noté", meilleur ? `${esc(meilleur.titre)} · ${String(meilleur.rating).replace(".", ",")}/5` : "—"],
-    ["Note moyenne", moy != null ? String(Math.round(moy * 100) / 100).replace(".", ",") + "/5" : "—"]
+    ["MMT au journal", mmt.length], ["MMT officiels", reels], ["Consul le plus assidu", consulTx(assidu)], ["MMT le mieux noté", nomMMT(meilleur)],
+    ["Note moyenne", moy != null ? String(Math.round(moy * 100) / 100).replace(".", ",") + "/5" : "—"], ["MMT hors série", horsSerie], ["Consul le moins assidu", consulTx(moinsAssidu)], ["MMT le moins bien noté", nomMMT(pire)]
   ].map(([t, v]) => `<div class="carte o" style="padding:14px 16px"><span class="tag">${t}</span><h3 style="font-size:1.25rem;margin-top:6px">${v}</h3></div>`).join("");
 
   const comptes = Object.fromEntries(SAISONS.map(s => [s, mmt.filter(m => m.saison === s).length]));
