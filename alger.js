@@ -38,12 +38,23 @@ function compter(votes) {
   Object.entries(votes || {}).forEach(([id, v]) => { if (!ok.has(id)) return; v === "pour" ? pour += poids(id) : contre += poids(id); });
   return { pour, contre };
 }
+// Décret d'Alger n°001, art. 9 : en cas d'égalité, peu importe le nombre de membres, le Gouverneur tranche.
+// Donc dès que le camp du Gouverneur atteint la moitié des voix, il ne peut plus perdre : le décret est tranché.
+function decider(votes) {
+  const { pour, contre } = compter(votes), total = totalVoix(), seuil = Math.floor(total / 2) + 1;
+  const gv = gouverneur() ? (votes || {})[gouverneur().id] : undefined, moitie = total / 2;
+  if (pour >= seuil) return "adopte";
+  if (contre >= seuil) return "rejete";
+  if (Number.isInteger(moitie) && gv === "pour" && pour >= moitie) return "adopte";
+  if (Number.isInteger(moitie) && gv === "contre" && contre >= moitie) return "rejete";
+  return "vote";
+}
 
 function afficherMembres() {
   $("#z-membres").hidden = false;
   const g = gouverneur();
   $("#membres").innerHTML = (g ? [`<b>${esc(nomOfficiel(g))}</b> · Gouverneur (2 voix)`] : []).concat(membres().map(u => `<b>${esc(nomOfficiel(u))}</b> · membre`)).join("<br>") || '<span class="vide">Aucun membre.</span>';
-  $("#voix").textContent = `${totalVoix()} voix au total · un décret est adopté avec plus de la moitié des voix (${Math.floor(totalVoix() / 2) + 1}).`;
+  $("#voix").textContent = `${totalVoix()} voix au total · un décret est adopté avec plus de la moitié des voix (${Math.floor(totalVoix() / 2) + 1}). En cas d'égalité, le Gouverneur tranche (Décret d'Alger n°001).`;
 }
 
 $("#f-decret").onsubmit = async e => {
@@ -67,7 +78,7 @@ function afficher() {
     const { pour, contre } = compter(d.votes), mien = d.votes?.[uid];
     return `<div class="bloc"><span class="tag sans">${ETIQ[d.statut]}</span><h3>${esc(d.titre)}</h3><p class="contenu">${esc(d.contenu).replace(/\n/g, "<br>")}</p>
       <p class="sans"><small>Proposé par ${esc(d.auteurP)} · ${dateFr(d.creeLe)}</small></p>
-      <p class="sans">Pour : <b>${pour}</b> · Contre : <b>${contre}</b> voix · il en faut ${seuil}</p>
+      <p class="sans">Pour : <b>${pour}</b> · Contre : <b>${contre}</b> voix · il en faut ${seuil}${totalVoix() % 2 === 0 ? `, ou ${totalVoix() / 2} avec le Gouverneur (il tranche les égalités)` : ""}</p>
       <p class="qui-vote sans">${Object.entries(d.votes || {}).map(([id, v]) => `${v === "pour" ? "✅" : "❌"} ${esc(nomDe(id))}${poids(id) === 2 ? " (×2)" : ""}`).join(" · ")}</p>
       <div data-zone="${d.id}"></div>
       <div class="actions sans">
@@ -79,8 +90,7 @@ function afficher() {
 
   document.querySelectorAll("[data-vote]").forEach(b => b.onclick = async () => {
     const d = decrets.find(x => x.id === b.dataset.vote), v = b.dataset.v;
-    const { pour, contre } = compter({ ...(d.votes || {}), [uid]: v });
-    const statut = pour >= seuil ? "adopte" : contre >= seuil ? "rejete" : "vote";
+    const statut = decider({ ...(d.votes || {}), [uid]: v });
     try { await updateDoc(doc(db, "marche", d.id), { ["votes." + uid]: v, statut }); if (statut === "adopte") message($("#msg-votes"), "Décret adopté par l'Assemblée : il attend la publication du Gouverneur.", "ok"); }
     catch (e) { message($("#msg-votes"), erreurFr(e), "erreur"); }
   });
