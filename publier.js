@@ -1,5 +1,5 @@
 // Journal officiel : le Consul fondateur valide chaque texte adopté avant qu'il soit publié dans Documents
-import { auth, db, $, esc, message, erreurFr, dateFr, confirmer } from "./parcum.js?v=19";
+import { auth, db, $, esc, message, erreurFr, dateFr, confirmer } from "./parcum.js?v=20";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, onSnapshot, collection, query, where, writeBatch, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 

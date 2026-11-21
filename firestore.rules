@@ -29,7 +29,7 @@ service cloud.firestore {
         && request.resource.data.creeLe == request.time;
       allow update: if estConsul()
         && !change(['chef'])
-        && (!change(['prenom','nom','senat','juge']) || estChef())
+        && (!change(['prenom','nom','senat','juge','assemblee']) || estChef())
         && (!change(['role'])
             || estChef()
             || (resource.data.role in ['visiteur','resident'] && request.resource.data.role == 'citoyen'
@@ -309,6 +309,30 @@ service cloud.firestore {
         && request.resource.data.publieLe == request.time;
       allow update: if estChef() && !change(['publieLe']);
       allow delete: if estChef();
+    }
+
+    // ---------- Marche d'Alger ----------
+    function assemblee() { return existe() && (moi().get('assemblee', false) == true || estChef()); }
+
+    match /marche/{id} {
+      allow read: if resource.data.statut == 'publie' || assemblee();
+      allow create: if assemblee()
+        && request.resource.data.keys().hasOnly(['titre','contenu','auteur','auteurP','creeLe','votes','statut'])
+        && request.resource.data.auteur == request.auth.uid
+        && request.resource.data.statut == 'vote'
+        && request.resource.data.votes.size() == 0
+        && texte(request.resource.data.titre, 1, 120)
+        && texte(request.resource.data.contenu, 1, 8000)
+        && request.resource.data.creeLe == request.time;
+      // Vote des membres, tant que le décret est en vote (publication réservée au Gouverneur)
+      allow update: if assemblee() && resource.data.statut == 'vote'
+        && seulement(['votes','statut'])
+        && request.resource.data.votes.diff(resource.data.votes).affectedKeys().hasOnly([request.auth.uid])
+        && request.resource.data.votes[request.auth.uid] in ['pour','contre']
+        && request.resource.data.statut in ['vote','adopte','rejete'];
+      // Gouverneur (Consul fondateur) : accès complet
+      allow update: if estChef();
+      allow delete: if estChef() || (connecte() && resource.data.auteur == request.auth.uid && resource.data.statut == 'vote');
     }
   }
 }

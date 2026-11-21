@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marche d'Alger — Parcum Fœderatio</title>
+<meta name="description" content="La Marche d'Alger : la branche algérienne de la Parcum Fœderatio, son Gouverneur, son Assemblée et ses décrets.">
+<link rel="icon" type="image/png" href="embleme.png">
+<link rel="stylesheet" href="style.css?v=20">
+</head>
+<body class="theme-vert">
+<header class="barre sans">
+  <div class="in">
+    <a href="index.html"><img src="embleme.png" alt="Emblème"></a>
+    <a class="nom" href="index.html">PARCUM FŒDERATIO</a>
+    <button class="menu-btn" onclick="document.getElementById('nav').classList.toggle('ouvert')">Menu</button>
+    <nav id="nav">
+      <a href="index.html">Accueil</a>
+      <a href="mmt.html">Le MMT</a>
+      <a href="institutions.html">Institutions</a>
+      <a href="territoires.html" class="actif">Territoires</a>
+      <a href="economie.html">Économie</a>
+      <a href="documents.html">Documents</a>
+      <a href="culture.html">Art et Culture</a>
+      <a href="boutique.html">Boutique</a>
+      <a href="citoyennete.html">Citoyenneté</a>
+      <a href="compte.html" class="nav-compte">Mon compte</a>
+    </nav>
+  </div>
+</header>
+<div class="tete"><div class="in"><div class="kicker sans">Marche d'Alger</div><h1>La Marche d'Alger</h1><div class="fil sans"><a href="index.html">Accueil</a> › <a href="territoires.html">Territoires</a> › Marche d'Alger</div></div></div><main><section>
+<p class="lead">La branche algérienne de la Parcum Fœderatio, créée par le Décret n°030. La Fédération québécoise en est le « père » : ses lois s'appliquent aussi en Algérie, mais les décrets de la Marche s'appliquent seulement en Algérie et n'ont aucun pouvoir sur le Québec.</p>
+<div class="grille" style="margin-top:22px">
+  <div class="carte" style="border-top-color:#1E6B3A"><span class="tag sans">Dirigeant</span><h3>Aylane Gamar</h3><p><b>Parquistador d'Alger</b> du point de vue du Québec, et <b>Gouverneur</b> du point de vue d'Alger. Il préside l'Assemblée, et son vote compte double.</p></div>
+  <div class="carte" style="border-top-color:#C8090A"><span class="tag sans">Législatif</span><h3>L'Assemblée</h3><p>Le conseil de la Marche. Elle peut faire tout ce que fait le Conseil du MMT au Québec, mais seulement pour l'Algérie : émettre des décrets et annexer des territoires.</p></div>
+  <div class="carte" style="border-top-color:#F2B705"><span class="tag sans">Culture</span><h3>Bled Studios</h3><p>Le studio de cinéma parquiste de la Marche, à Alger. <a href="culture.html#cinema">En savoir plus →</a></p></div>
+</div>
+
+<div id="z-membres" class="panneau-compte" hidden><h2>Membres de l'Assemblée</h2><p class="sans" id="membres"></p><p class="mini sans" id="voix"></p></div>
+
+<div id="z-vote" hidden>
+  <div class="panneau-compte">
+    <h2>Proposer un décret de la Marche</h2>
+    <form id="f-decret" class="formu sans" style="max-width:none"><label>Titre<input id="d-titre" maxlength="120" required></label><label>Contenu<textarea id="d-contenu" maxlength="8000" required></textarea></label><button class="btn" type="submit">Soumettre à l'Assemblée</button></form>
+    <div id="msg-decret" class="sans"></div>
+  </div>
+  <div class="panneau-compte">
+    <div class="onglets sans" id="filtres"><button class="onglet on" data-v="vote">En vote<span class="nb" id="nb-vote"></span></button><button class="onglet" data-v="adopte">Adoptés, à publier<span class="nb" id="nb-adopte"></span></button><button class="onglet" data-v="rejete">Rejetés</button><button class="onglet" data-v="publie">Publiés</button></div>
+    <div id="msg-votes" class="sans"></div><div id="decrets-vote"></div>
+  </div>
+</div>
+
+<h2 style="margin-top:40px">Décrets de la Marche d'Alger</h2>
+<p class="sans mini">Publiés par le Gouverneur après leur adoption par l'Assemblée.</p>
+<div id="publies"><p class="vide sans">Chargement…</p></div>
+<div class="suite sans"><a href="territoires.html">← Territoires</a><a href="economie.html">Économie →</a></div>
+</section></main>
+<script type="module" src="alger.js?v=20"></script>
+<footer class="sans">
+  <div class="in">
+    <img src="embleme.png" alt="">
+    <div>
+      <strong>Parcum Fœderatio</strong> · Fédération du Parc<br>
+      <span class="petit">« Que le Parc nous accepte et nous guide » · Fondée le 26 mars 2025</span>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
